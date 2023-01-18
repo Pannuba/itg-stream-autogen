@@ -24,50 +24,44 @@ def createStream(streamLength):
 
 		print(currentDirection + ' ' + str(firstArrowDone))
 
-		match random.randint(0, 2):
+		candleOrNot = random.randint(0, 4)
 
-			case 0:	# Add candle
-				if firstArrowDone:
-					#lastArrow = pattern[-1]
-					secondToLastArrow = pattern[-2]
-					
-					if secondToLastArrow == 'U':
-						stream += arrowsDict['D']
-					if secondToLastArrow == 'D':
-						stream += arrowsDict['U']
+		if candleOrNot == 0:	# Add candle
+			if firstArrowDone:
+				#lastArrow = pattern[-1]
+				secondToLastArrow = pattern[-2]
+				
+				if secondToLastArrow == 'U':
+					stream += arrowsDict['D']
+				if secondToLastArrow == 'D':
+					stream += arrowsDict['U']
 
-					if pattern in nextArrowLeftPatterns: # 'pattern' is the last added pattern
-						pattern = chooseNextPattern(startFromRightPatterns)
-						currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-						streamLength -= len(pattern) + 1 # +1 because of the candle arrow
-						stream += convertPatternToRows(pattern)
-					
-					elif pattern in nextArrowRightPatterns:
-						pattern = chooseNextPattern(startFromLeftPatterns)
-						currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-						streamLength -= len(pattern) + 1 # +1 because of the candle arrow
-						stream += convertPatternToRows(pattern)
-					
-					firstArrowDone = 1
-
-
-			case 1 | 2:	# Add non-candle pattern
-				# Get random pattern from current direction
-				# Case 2 and 3 are the same, so it's more likely to stay in the same direction
-				#if firstArrowDone == 1:
-				#	pattern = nextArrowLeftPatterns[random.randint(0, 5)] if (currentDirection == 'L') else nextArrowRightPatterns[random.randint(0, 5)]
-
-				#else:
-				pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
-
-				currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-				streamLength -= len(pattern)
-				stream += convertPatternToRows(pattern)
+				if pattern in nextArrowLeftPatterns: # 'pattern' is the last added pattern
+					pattern = chooseNextPattern(startFromRightPatterns)
+					currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
+					streamLength -= len(pattern) + 1 # +1 because of the candle arrow
+					stream += convertPatternToRows(pattern)
+				
+				elif pattern in nextArrowRightPatterns:
+					pattern = chooseNextPattern(startFromLeftPatterns)
+					currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
+					streamLength -= len(pattern) + 1 # +1 because of the candle arrow
+					stream += convertPatternToRows(pattern)
+				
 				firstArrowDone = 1
+
+
+		else:	# Add non-candle pattern
+			pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
+			currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
+			streamLength -= len(pattern)
+			stream += convertPatternToRows(pattern)
+			firstArrowDone = 1
 	
 	print('stream:\n' + stream)
 	return stream
 
+# Some patterns have a higher weight than others, meaning they are more likely to be inserted into the stream (stairs lol)
 def chooseNextPattern(patternDict):
 	totalWeight = 100
 	num = random.randint(0, totalWeight - 1)
