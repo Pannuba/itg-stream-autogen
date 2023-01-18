@@ -36,7 +36,7 @@ def createStream(streamLength):
 					if secondToLastArrow == 'D':
 						stream += arrowsDict['U']
 
-					if pattern in nextArrowLeftPatterns:
+					if pattern in nextArrowLeftPatterns: # 'pattern' is the last added pattern
 						pattern = startFromRightPatterns[random.randint(0, 5)]
 						currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
 						streamLength -= len(pattern) + 1 # +1 because of the candle arrow
