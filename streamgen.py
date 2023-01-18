@@ -17,18 +17,18 @@ def createStream(streamLength):
 	
 	currentDirection = 'L';	# The next pattern must start with this arrow
 	stream = ""
-	justChangedDirection = 1	# Rename to justStarted?? Add "mono" variable?
+	firstArrowDone = 0
 
 	while (streamLength > 3):
 
-		print(currentDirection + " " + str(justChangedDirection))
+		print(currentDirection + " " + str(firstArrowDone))
 
 		match random.randint(0, 2):
 
 			case 0:	# Add candle
-				if not justChangedDirection:
+				if firstArrowDone:
 					#lastArrow = pattern[-1]
-					secondToLastArrow = pattern[-2] #??
+					secondToLastArrow = pattern[-2]
 					
 					if secondToLastArrow == 'U':
 						stream += "0100\n"
@@ -40,20 +40,20 @@ def createStream(streamLength):
 						currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
 						streamLength -= len(pattern) + 1 # +1 because of the candle arrow
 						stream += convertPatternToRows(pattern)
-						justChangedDirection = 0
 					
 					elif pattern in nextArrowRightPatterns:
 						pattern = startFromLeftPatterns[random.randint(0, 5)]
 						currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
 						streamLength -= len(pattern) + 1 # +1 because of the candle arrow
 						stream += convertPatternToRows(pattern)
-						justChangedDirection = 0
+					
+					firstArrowDone = 1
 
 
 			case 1 | 2:	# Add non-candle pattern
 				# Get random pattern from current direction
 				# Case 2 and 3 are the same, so it's more likely to stay in the same direction
-				#if justChangedDirection == 1:
+				#if firstArrowDone == 1:
 				#	pattern = nextArrowLeftPatterns[random.randint(0, 5)] if (currentDirection == 'L') else nextArrowRightPatterns[random.randint(0, 5)]
 
 				#else:
@@ -62,7 +62,7 @@ def createStream(streamLength):
 				currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
 				streamLength -= len(pattern)
 				stream += convertPatternToRows(pattern)
-				justChangedDirection = 0
+				firstArrowDone = 0
 	
 	print("stream:\n" + stream)
 	return stream
