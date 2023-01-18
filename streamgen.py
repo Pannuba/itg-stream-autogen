@@ -7,9 +7,9 @@ nextArrowLeftPatterns = ['LDUR', 'LUDR', 'RUDUR', 'RDUDR', 'RUR', 'RDR']
 # Patterns that start with a foot, and the next one starts with the right arrow
 nextArrowRightPatterns = ['RUDL', 'RDUL', 'LDUDL', 'LUDUL', 'LUL', 'LDL']
 # Patterns that start with left
-startFromLeftPatterns = ['LDUR', 'LUDR', 'LDUDL', 'LUDUL', 'LUL', 'LDL']
+startFromLeftPatterns = {'LDUR' : 25, 'LUDR' : 25, 'LDUDL' : 10, 'LUDUL' : 10, 'LUL' : 15, 'LDL' : 15}
 # Yeah
-startFromRightPatterns = ['RUDL', 'RDUL', 'RUDUR', 'RDUDR', 'RUR', 'RDR']
+startFromRightPatterns = {'RUDL' : 25, 'RDUL' : 25, 'RUDUR' : 10, 'RDUDR' : 10, 'RUR' : 15, 'RDR' : 15 }
 
 arrowsDict = {'L' : '1000\n', 'D' : '0100\n', 'U' : '0010\n', 'R' : '0001\n'}
 
@@ -37,13 +37,13 @@ def createStream(streamLength):
 						stream += arrowsDict['U']
 
 					if pattern in nextArrowLeftPatterns: # 'pattern' is the last added pattern
-						pattern = startFromRightPatterns[random.randint(0, 5)]
+						pattern = chooseNextPattern(startFromRightPatterns)
 						currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
 						streamLength -= len(pattern) + 1 # +1 because of the candle arrow
 						stream += convertPatternToRows(pattern)
 					
 					elif pattern in nextArrowRightPatterns:
-						pattern = startFromLeftPatterns[random.randint(0, 5)]
+						pattern = chooseNextPattern(startFromLeftPatterns)
 						currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
 						streamLength -= len(pattern) + 1 # +1 because of the candle arrow
 						stream += convertPatternToRows(pattern)
@@ -58,16 +58,25 @@ def createStream(streamLength):
 				#	pattern = nextArrowLeftPatterns[random.randint(0, 5)] if (currentDirection == 'L') else nextArrowRightPatterns[random.randint(0, 5)]
 
 				#else:
-				pattern = startFromLeftPatterns[random.randint(0, 5)] if (currentDirection == 'L') else startFromRightPatterns[random.randint(0, 5)]
+				pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
 
 				currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
 				streamLength -= len(pattern)
 				stream += convertPatternToRows(pattern)
-				firstArrowDone = 0
+				firstArrowDone = 1
 	
 	print('stream:\n' + stream)
 	return stream
 
+def chooseNextPattern(patternDict):
+	totalWeight = 100
+	num = random.randint(0, totalWeight - 1)
+
+	for pattern, weight in patternDict.items():
+		if num < weight:
+			return pattern
+
+		num -= weight
 
 # Converts the pattern strings (LUDL, etc) in a row to be added to the .sm file
 def convertPatternToRows(pattern):
