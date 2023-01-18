@@ -1,3 +1,11 @@
+# Ignore Stepmania charts
+
+*.sm
+*.ssc
+*.ogg
+*.png
+*.sm.old
+*.ssc.old
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
