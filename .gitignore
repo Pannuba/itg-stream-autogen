@@ -1,0 +1,10 @@
+# Ignore Stepmania charts
+
+*.sm
+*.ssc
+*.ogg
+*.mp3
+*.png
+*.sm.old
+*.ssc.old
+
