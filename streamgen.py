@@ -21,42 +21,45 @@ def createStream(streamLength):
 	
 	currentDirection = 'L';	# The next pattern must start with this arrow
 	stream = ''
-	firstArrowDone = 0	# TODO: add arrow manually at the beginning, remove flag
+
+	pattern = chooseNextPattern(startFromRightPatterns)	# TODO pass parameter(?)
+	lastPatterns.insert(0, pattern)
+	lastPatterns.pop()
+	currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
+	streamLength -= len(pattern)
+	stream += convertPatternToRows(pattern)
 
 	while (streamLength > 3):
 
-		print(currentDirection + ' ' + str(firstArrowDone))
+		print(currentDirection)
 
 		candleOrNot = random.randint(0, 4)
 
 		if candleOrNot == 0:	# Add candle
-			if firstArrowDone:
-				#lastArrow = pattern[-1]
-				secondToLastArrow = pattern[-2]
-				
-				if secondToLastArrow == 'U':
-					stream += arrowsDict['D']
-				if secondToLastArrow == 'D':
-					stream += arrowsDict['U']
+			#lastArrow = pattern[-1]
+			secondToLastArrow = pattern[-2]
+			
+			if secondToLastArrow == 'U':
+				stream += arrowsDict['D']
+			if secondToLastArrow == 'D':
+				stream += arrowsDict['U']
 
-				if pattern in nextArrowLeftPatterns: # 'pattern' is the last added pattern
-					pattern = chooseNextPattern(startFromRightPatterns)
-					currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-					streamLength -= len(pattern) + 1 # +1 because of the candle arrow
-					stream += convertPatternToRows(pattern)
+			if pattern in nextArrowLeftPatterns: # 'pattern' is the last added pattern
+				pattern = chooseNextPattern(startFromRightPatterns)
+				currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
+				streamLength -= len(pattern) + 1 # +1 because of the candle arrow
+				stream += convertPatternToRows(pattern)
+			
+			elif pattern in nextArrowRightPatterns:
+				pattern = chooseNextPattern(startFromLeftPatterns)
+				currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
+				streamLength -= len(pattern) + 1 # +1 because of the candle arrow
+				stream += convertPatternToRows(pattern)
 				
-				elif pattern in nextArrowRightPatterns:
-					pattern = chooseNextPattern(startFromLeftPatterns)
-					currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-					streamLength -= len(pattern) + 1 # +1 because of the candle arrow
-					stream += convertPatternToRows(pattern)
-				
-				firstArrowDone = 1
-
 
 		else:	# Add non-candle pattern
 			pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
-			
+
 			while pattern in lastPatterns:
 				pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
 			
@@ -66,7 +69,6 @@ def createStream(streamLength):
 			currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
 			streamLength -= len(pattern)
 			stream += convertPatternToRows(pattern)
-			firstArrowDone = 1
 	
 	print('stream:\n' + stream)
 	return stream
