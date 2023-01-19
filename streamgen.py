@@ -1,7 +1,5 @@
 import random
 
-# TODO: dict, where the value is the priority of the pattern? (e.g. stairs have higher priority than doritos)
-
 # Patterns that start with a foot, and the next one starts with the left arrow
 nextArrowLeftPatterns = ['LDUR', 'LUDR', 'RUDUR', 'RDUDR', 'RUR', 'RDR']
 # Patterns that start with a foot, and the next one starts with the right arrow
@@ -12,13 +10,18 @@ startFromLeftPatterns = {'LDUR' : 25, 'LUDR' : 25, 'LDUDL' : 10, 'LUDUL' : 10, '
 startFromRightPatterns = {'RUDL' : 25, 'RDUL' : 25, 'RUDUR' : 10, 'RDUDR' : 10, 'RUR' : 15, 'RDR' : 15 }
 
 arrowsDict = {'L' : '1000\n', 'D' : '0100\n', 'U' : '0010\n', 'R' : '0001\n'}
+# Last N patterns (3 for now). If a pattern to be added is in this list, it is discarded
+lastPatterns = ['X', 'X', 'X']	# Initialize with dummy values
+
+# TODO: keep list of last N patterns, if the chosen pattern is in there discard it and choose another
+# Might do a similar thing for right facing / left facing
 
 
 def createStream(streamLength):
 	
 	currentDirection = 'L';	# The next pattern must start with this arrow
 	stream = ''
-	firstArrowDone = 0
+	firstArrowDone = 0	# TODO: add arrow manually at the beginning, remove flag
 
 	while (streamLength > 3):
 
@@ -53,6 +56,13 @@ def createStream(streamLength):
 
 		else:	# Add non-candle pattern
 			pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
+			
+			while pattern in lastPatterns:
+				pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
+			
+			lastPatterns.insert(0, pattern)
+			lastPatterns.pop()
+
 			currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
 			streamLength -= len(pattern)
 			stream += convertPatternToRows(pattern)
@@ -63,7 +73,7 @@ def createStream(streamLength):
 
 # Some patterns have a higher weight than others, meaning they are more likely to be inserted into the stream (stairs lol)
 def chooseNextPattern(patternDict):
-	totalWeight = 100
+	totalWeight = 100	# TODO make dynamic
 	num = random.randint(0, totalWeight - 1)
 
 	for pattern, weight in patternDict.items():
