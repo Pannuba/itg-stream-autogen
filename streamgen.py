@@ -31,38 +31,14 @@ def createStream(streamLength):
 
 	while (streamLength > 3):
 
-		candleOrNot = random.randint(0, 4)
+		candleOrNot = random.randint(0, 1)
 
 		if candleOrNot == 0:	# Add candle
-			#lastArrow = pattern[-1]
-			secondToLastArrow = pattern[-2]
-			
-			if secondToLastArrow == 'U':
-				stream += arrowsDict['D']
-			if secondToLastArrow == 'D':
-				stream += arrowsDict['U']
-
-			streamLength -= 1
-
-			if pattern in nextArrowLeftPatterns: # 'pattern' is the last added pattern
-				pattern = chooseNextPattern(startFromRightPatterns)
-				stream, streamLength, currentDirection = addPattern(pattern, stream, streamLength)
-			
-			elif pattern in nextArrowRightPatterns:
-				pattern = chooseNextPattern(startFromLeftPatterns)
-				stream, streamLength, currentDirection = addPattern(pattern, stream, streamLength)
-				# currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-				# streamLength -= len(pattern) + 1 # +1 because of the candle arrow
-				# stream += convertPatternToRows(pattern)
-				
+			print('adding candle')
+			pattern, stream, streamLength, currentDirection = addCandle(pattern, stream, streamLength)				
 
 		else:	# Add non-candle pattern
-			pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
-
-			while pattern in lastPatterns:
-				pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
-			
-			stream, streamLength, currentDirection = addPattern(pattern, stream, streamLength)
+			pattern, stream, streamLength, currentDirection = addNonCandle(pattern, stream, streamLength, currentDirection)	# TODO: make global or create stream class
 	
 	print('stream:\n' + stream)
 	return stream
@@ -85,8 +61,35 @@ def addPattern(pattern, stream, streamLength):
 	streamLength -= len(pattern)
 	stream += convertPatternToRows(pattern)
 
-	return stream, streamLength, currentDirection
+	return pattern, stream, streamLength, currentDirection
 
+def addCandle(pattern, stream, streamLength):
+	secondToLastArrow = pattern[-2]
+	
+	if secondToLastArrow == 'U':
+		stream += arrowsDict['D']
+	if secondToLastArrow == 'D':
+		stream += arrowsDict['U']
+
+	streamLength -= 1
+
+	# BUG (fixed): after adding addCandle and addNonCandle, I had to make them return the pattern that was added. ugly ass code
+
+	if pattern in nextArrowLeftPatterns: # 'pattern' is the last added pattern
+		pattern = chooseNextPattern(startFromRightPatterns)
+	
+	elif pattern in nextArrowRightPatterns:
+		pattern = chooseNextPattern(startFromLeftPatterns)
+	
+	return addPattern(pattern, stream, streamLength)
+
+def addNonCandle(pattern, stream, streamLength, currentDirection):
+	pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)	
+
+	while pattern in lastPatterns:
+		pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
+	
+	return addPattern(pattern, stream, streamLength)	# TODO: make global or create stream class
 
 # Converts the pattern strings (LUDL, etc) in a row to be added to the .sm file
 def convertPatternToRows(pattern):
