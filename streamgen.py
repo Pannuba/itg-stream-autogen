@@ -31,8 +31,6 @@ def createStream(streamLength):
 
 	while (streamLength > 3):
 
-		print(currentDirection)
-
 		candleOrNot = random.randint(0, 4)
 
 		if candleOrNot == 0:	# Add candle
@@ -44,17 +42,18 @@ def createStream(streamLength):
 			if secondToLastArrow == 'D':
 				stream += arrowsDict['U']
 
+			streamLength -= 1
+
 			if pattern in nextArrowLeftPatterns: # 'pattern' is the last added pattern
 				pattern = chooseNextPattern(startFromRightPatterns)
-				currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-				streamLength -= len(pattern) + 1 # +1 because of the candle arrow
-				stream += convertPatternToRows(pattern)
+				stream, streamLength, currentDirection = addPattern(pattern, stream, streamLength)
 			
 			elif pattern in nextArrowRightPatterns:
 				pattern = chooseNextPattern(startFromLeftPatterns)
-				currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-				streamLength -= len(pattern) + 1 # +1 because of the candle arrow
-				stream += convertPatternToRows(pattern)
+				stream, streamLength, currentDirection = addPattern(pattern, stream, streamLength)
+				# currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
+				# streamLength -= len(pattern) + 1 # +1 because of the candle arrow
+				# stream += convertPatternToRows(pattern)
 				
 
 		else:	# Add non-candle pattern
@@ -63,12 +62,7 @@ def createStream(streamLength):
 			while pattern in lastPatterns:
 				pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
 			
-			lastPatterns.insert(0, pattern)
-			lastPatterns.pop()
-
-			currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-			streamLength -= len(pattern)
-			stream += convertPatternToRows(pattern)
+			stream, streamLength, currentDirection = addPattern(pattern, stream, streamLength)
 	
 	print('stream:\n' + stream)
 	return stream
@@ -83,6 +77,16 @@ def chooseNextPattern(patternDict):
 			return pattern
 
 		num -= weight
+
+def addPattern(pattern, stream, streamLength):
+	lastPatterns.insert(0, pattern)
+	lastPatterns.pop()
+	currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
+	streamLength -= len(pattern)
+	stream += convertPatternToRows(pattern)
+
+	return stream, streamLength, currentDirection
+
 
 # Converts the pattern strings (LUDL, etc) in a row to be added to the .sm file
 def convertPatternToRows(pattern):
