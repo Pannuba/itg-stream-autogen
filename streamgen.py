@@ -30,7 +30,7 @@ def createStream(streamLength):
 	nstream.length -= len(pattern)
 	nstream.arrows += convertPatternToRows(pattern)
 
-	while (nstream.length > 3):
+	while (nstream.length > 0):
 
 		candleOrNot = random.randint(0, 4)
 
@@ -109,12 +109,13 @@ def convertPatternToRows(pattern):
 # Instead of editing the existing file, I should create a new one (copy part before and after stream)
 def writeStream(stream, streamBegin, streamCounter, streamEnd, chart): # TODO: add option for 16ths, 24ths, etc...
 	newChart = ''
-	newStreamLines = stream.arrows.split('\n')
+	newStreamLines = stream.arrows.split('\n')	# Last element is empty??
+	newStreamLines.pop()
 	streamLineCounter = 0
 
 	for i, line in enumerate(chart): # Read line given line #??
 
-		if i < streamBegin or i > streamEnd or line == ',\n':
+		if i < streamBegin or i > streamEnd + 1 or line == ',\n':
 			newChart += line
 
 		else:
