@@ -43,7 +43,8 @@ def createStream(streamLength):
 			pattern = addNonCandle(pattern, nstream)	# TODO: make global or create stream class
 	
 	print('stream:\n' + nstream.arrows)
-	return nstream.arrows
+	
+	return nstream
 
 # Some patterns have a higher weight than others, meaning they are more likely to be inserted into the stream (stairs lol)
 def chooseNextPattern(patternDict):
@@ -105,12 +106,32 @@ def convertPatternToRows(pattern):
 	return lines
 
 
+# Instead of editing the existing file, I should create a new one (copy part before and after stream)
+def writeStream(stream, streamBegin, streamCounter, streamEnd, chart): # TODO: add option for 16ths, 24ths, etc...
+	newChart = ''
+	newStreamLines = stream.arrows.split('\n')
+	streamLineCounter = 0
+
+	for i, line in enumerate(chart): # Read line given line #??
+
+		if i < streamBegin or i > streamEnd or line == ',\n':
+			newChart += line
+
+		else:
+			newChart += newStreamLines[streamLineCounter] + '\n'	# Find better/faster way instead of split? Save to StreamBlock directly as list
+			streamLineCounter += 1
+	
+	print('outputChart: ' + newChart)
+
+	with open('chart_out.sm', 'w') as outputChart:
+		outputChart.write(newChart)
+
 if __name__ == '__main__':
 
-	chart = open('chart.sm', 'r+')
+	chart = open('chart-2222.sm', 'r+')
 	streamblocks = [] # Line numbers where the streams begin?
 	# OR store a pair of (beginningLine, #notes)
-
+	
 	lineCounter = 0; streamBegin = 0; streamCounter = 0; streamEnd = 0
 
 	# TODO: Dict like (X, Y) where X is the line # where a stream block starts, Y is for how many rows or arrows
@@ -119,7 +140,7 @@ if __name__ == '__main__':
 	for i, line in enumerate(chart): # Read line given line #??
 		lineCounter += 1
 
-		if line == 'XXXX\n':	# For now only 1 stream
+		if line == '2222\n':	# For now only 1 stream
 			streamCounter += 1
 
 			if streamBegin == 0:	# TODO: Avoid this check every time, only required at the beginning of the stream. Probably already done
@@ -127,15 +148,18 @@ if __name__ == '__main__':
 
 			for j, liine in enumerate(chart):
 
-				if liine == 'XXXX\n':
+				if liine == '0000\n':
 					streamCounter += 1
 				
-				else:
+				if liine == '3333\n':
+					streamCounter += 1
 					streamEnd = i + j
 					break
 		
 
 	print(streamCounter) # Ok but fix off-by-one
 	print(streamBegin)
-	print(streamEnd)
-	createStream(streamCounter)
+	print(streamEnd)	# TODO: store these properties in StreamBlock? YESSS
+	chart.seek(0)		# Rewinds iterator
+	stream = createStream(streamCounter) # returns a StreamBlock
+	writeStream(stream, streamBegin, streamCounter, streamEnd, chart)
