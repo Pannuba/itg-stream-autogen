@@ -1,4 +1,5 @@
 import random
+from StreamBlock import *
 
 # Patterns that start with a foot, and the next one starts with the left arrow
 nextArrowLeftPatterns = ['LDUR', 'LUDR', 'RUDUR', 'RDUDR', 'RUR', 'RDR']
@@ -19,29 +20,30 @@ lastPatterns = ['X', 'X', 'X']	# Initialize with dummy values
 
 def createStream(streamLength):
 	
-	currentDirection = 'L';	# The next pattern must start with this arrow
-	stream = ''
+	nstream = StreamBlock(streamLength, 'L') # The next pattern must start with this arrow
 
+	# TODO: pass currentDirection (now nextArrow) to chooseNextPattern?
 	pattern = chooseNextPattern(startFromRightPatterns)	# TODO pass parameter(?)
 	lastPatterns.insert(0, pattern)
 	lastPatterns.pop()
-	currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-	streamLength -= len(pattern)
-	stream += convertPatternToRows(pattern)
+	nstream.nextArrow = 'L' if (pattern[-1] == 'R') else 'R'
+	nstream.length -= len(pattern)
+	nstream.arrows += convertPatternToRows(pattern)
 
-	while (streamLength > 3):
+	while (nstream.length > 3):
 
-		candleOrNot = random.randint(0, 1)
+		candleOrNot = random.randint(0, 4)
 
+	# pattern has to be returned because different functions use it to determine the next pattern
 		if candleOrNot == 0:	# Add candle
 			print('adding candle')
-			pattern, stream, streamLength, currentDirection = addCandle(pattern, stream, streamLength)				
+			pattern = addCandle(pattern, nstream)				
 
 		else:	# Add non-candle pattern
-			pattern, stream, streamLength, currentDirection = addNonCandle(pattern, stream, streamLength, currentDirection)	# TODO: make global or create stream class
+			pattern = addNonCandle(pattern, nstream)	# TODO: make global or create stream class
 	
-	print('stream:\n' + stream)
-	return stream
+	print('stream:\n' + nstream.arrows)
+	return nstream.arrows
 
 # Some patterns have a higher weight than others, meaning they are more likely to be inserted into the stream (stairs lol)
 def chooseNextPattern(patternDict):
@@ -54,26 +56,27 @@ def chooseNextPattern(patternDict):
 
 		num -= weight
 
-def addPattern(pattern, stream, streamLength):
+# TODO: this should just *add* the pattern. Leave the direction stuff to something else
+def addPattern(pattern, stream):
 	lastPatterns.insert(0, pattern)
 	lastPatterns.pop()
-	currentDirection = 'L' if (pattern[-1] == 'R') else 'R'
-	streamLength -= len(pattern)
-	stream += convertPatternToRows(pattern)
+	stream.nextArrow = 'L' if (pattern[-1] == 'R') else 'R'
+	stream.length -= len(pattern)
+	stream.arrows += convertPatternToRows(pattern)
 
-	return pattern, stream, streamLength, currentDirection
+	return pattern
 
-def addCandle(pattern, stream, streamLength):
+def addCandle(pattern, stream):
 	secondToLastArrow = pattern[-2]
 	
 	if secondToLastArrow == 'U':
-		stream += arrowsDict['D']
+		stream.arrows += arrowsDict['D']
 	if secondToLastArrow == 'D':
-		stream += arrowsDict['U']
+		stream.arrows += arrowsDict['U']
 
-	streamLength -= 1
+	stream.length -= 1
 
-	# BUG (fixed): after adding addCandle and addNonCandle, I had to make them return the pattern that was added. ugly ass code
+	# BUG (fixed): after adding addCandle and addNonCandle, I had to make them return the pattern that was added. ugly code
 
 	if pattern in nextArrowLeftPatterns: # 'pattern' is the last added pattern
 		pattern = chooseNextPattern(startFromRightPatterns)
@@ -81,15 +84,15 @@ def addCandle(pattern, stream, streamLength):
 	elif pattern in nextArrowRightPatterns:
 		pattern = chooseNextPattern(startFromLeftPatterns)
 	
-	return addPattern(pattern, stream, streamLength)
+	return addPattern(pattern, stream)
 
-def addNonCandle(pattern, stream, streamLength, currentDirection):
-	pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)	
+def addNonCandle(pattern, stream):
+	pattern = chooseNextPattern(startFromLeftPatterns if (stream.nextArrow == 'L') else startFromRightPatterns)	
 
 	while pattern in lastPatterns:
-		pattern = chooseNextPattern(startFromLeftPatterns if (currentDirection == 'L') else startFromRightPatterns)
+		pattern = chooseNextPattern(startFromLeftPatterns if (stream.nextArrow == 'L') else startFromRightPatterns)
 	
-	return addPattern(pattern, stream, streamLength)	# TODO: make global or create stream class
+	return addPattern(pattern, stream)	# TODO: make global or create stream class
 
 # Converts the pattern strings (LUDL, etc) in a row to be added to the .sm file
 def convertPatternToRows(pattern):
@@ -107,7 +110,7 @@ if __name__ == '__main__':
 	chart = open('chart.sm', 'r+')
 	streamblocks = [] # Line numbers where the streams begin?
 	# OR store a pair of (beginningLine, #notes)
-	# TODO: Make class for a block of stream?
+
 	lineCounter = 0; streamBegin = 0; streamCounter = 0; streamEnd = 0
 
 	# TODO: Dict like (X, Y) where X is the line # where a stream block starts, Y is for how many rows or arrows
@@ -130,7 +133,6 @@ if __name__ == '__main__':
 				else:
 					streamEnd = i + j
 					break
-			
 		
 
 	print(streamCounter) # Ok but fix off-by-one
