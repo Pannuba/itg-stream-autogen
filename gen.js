@@ -178,47 +178,55 @@ function main()
 	fs = require('fs');
 	// Input has 4 selected measures. starts at line 1744
 	chart = fs.readFileSync('./input.sm').toString();
-	lines = chart.split('\n');	// List of strings, each one is a line
 
-	var streamCounter = 0, streamBegin = 0, streamEnd = 0, insideStream = false;
-	lines.forEach((line, i) => {
-		
-		if (line == "2222")	// Start of quad hold
-		{
-			insideStream = true;
-			streamCounter += 1;
-			streamBegin = i;
-		}
 
-		if (insideStream)
-		{
-			console.log("processing line", line);
+	do {
+		noMoreStreams = true;
+		lines = chart.split('\n');	// List of strings, each one is a line
 
-			if (line == "0000")
+		var streamCounter = 0, streamBegin = 0, streamEnd = 0, insideStream = false;
+		for (const [i, line] of lines.entries())
+		{		
+			if (line == "2222")	// Start of quad hold
 			{
+				noMoreStreams = false;
+				insideStream = true;
 				streamCounter += 1;
+				streamBegin = i;
 			}
 
-			if (line == "3333")
+			if (insideStream)
 			{
-				streamEnd = i;
-				insideStream = false;
+				console.log("processing line", line);
+
+				if (line == "0000")
+				{
+					streamCounter += 1;
+				}
+
+				if (line == "3333")
+				{
+					streamEnd = i;
+					insideStream = false;
+					break;
+				}
 			}
 		}
-	});
 
-	streamEnd -= 1 // To avoid contaminating next measure (in python, not sure here)
+		measures = streamCounter / 4;
 
-	measures = streamCounter / 4;
+		console.log("counter : ", streamCounter)
+		console.log("start st: ", streamBegin)
+		console.log("end strm: ", streamEnd)
+		console.log("measures: ", measures)
 
-	console.log("counter : ", streamCounter)
-	console.log("start st: ", streamBegin)
-	console.log("end strm: ", streamEnd)
-	console.log("measures: ", measures)
+		stream = generateStream(measures, 16)	// Generate n measures of 16ths
 
-	stream = generateStream(measures, 16)	// Generate n measures of 16ths
-
-	fs.writeFileSync('output.sm', getNewChart(stream, streamBegin, streamEnd, lines));
+		chart = getNewChart(stream, streamBegin, streamEnd, lines);
+	} while (!noMoreStreams)
+	
+	
+	fs.writeFileSync('output.sm', chart);
 }
   
 if (require.main === module)
