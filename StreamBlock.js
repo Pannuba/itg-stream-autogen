@@ -14,7 +14,7 @@ class StreamBlock {
 		var finalStream = [];
 		var count = 0;
 
-		for (let i = 0; i < this.measures; i++)
+		for (let i = 0; i < this.measures; i++)	// Even if there are excess arrows, it only gives the exact measures
 		{
 			for (let j = 0; j < this.quantization; j++)
 			{

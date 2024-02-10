@@ -132,9 +132,11 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 	var isStreamAdded = false
 
 	inputLines.forEach((line, i) => {
-		
-		if (i < streamBegin || i > (streamEnd + 1))	// We're before/after the generated stream
+		console.log("processing", line, ", i = ", i)
+		if (i < streamBegin || i > (streamEnd - 1))	// We're before/after the generated stream
 		{
+			console.log("adding", line)
+			console.log(line, "is before ", streamBegin, " and after ", streamEnd)
 			outputLines.push(line)
 		}
 
@@ -142,6 +144,7 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 		{
 			// add stream
 			stream.addCommas().forEach((line, j) => {
+				console.log("adding generated", line)
 				outputLines.push(line)
 			});
 			isStreamAdded = true;
@@ -179,9 +182,15 @@ function main(chart, quantization = 16, candleDens = 8)
 
 				if (line == "3333")
 				{
-					if (lines[i++] == "," || lines[i++] == ";") measures++;
 					streamEnd = i;
 					insideStream = false;
+
+					if (lines[++i] == "," || lines[++i] == ";")
+					{
+						measures++;	// adds measure if there's nothing between quad hold and end of measure
+						streamEnd += 2;	// TODO: remove magic numbers
+					}
+
 					break;
 				}
 			}
@@ -195,7 +204,6 @@ function main(chart, quantization = 16, candleDens = 8)
 		{
 			stream = generateStream(measures, quantization, candleDens)	// Generate n measures of 16ths
 			chart = getNewChart(stream, streamBegin, streamEnd, lines);
-			console.log(chart)
 		}
 	} while (!noMoreStreams) // faking
 
