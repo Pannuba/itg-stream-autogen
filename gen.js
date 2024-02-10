@@ -147,7 +147,7 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 	// turn outputlines into file, output.sm
 }
 
-function main(chart)
+function main(chart, quantization)
 {
 	console.log(chart)
 	do {
@@ -190,7 +190,7 @@ function main(chart)
 		console.log("end strm: ", streamEnd)
 		console.log("measures: ", measures)
 
-		stream = generateStream(measures, 16)	// Generate n measures of 16ths
+		stream = generateStream(measures, quantization)	// Generate n measures of 16ths
 
 		chart = getNewChart(stream, streamBegin, streamEnd, lines);
 	} while (!noMoreStreams) // faking
@@ -208,10 +208,14 @@ function main(chart)
 	link.click();
 }
 
-function readFile()
+function seParti()
 {
-	var chart = document.getElementById('chart').files[0]; // FileList object
-	console.log(chart);
+	var chart = document.getElementById('chart').files[0];
+	var quantization = document.getElementById('quantization').value;
+	var customQuant = document.getElementById("customquant").value;
+
+	if (customQuant && customQuant != 0) quantization = customQuant;
+
 
 	var reader = new FileReader();
 
@@ -219,7 +223,7 @@ function readFile()
 	{
 		return function(e)
 		{
-			main(e.target.result)
+			main(e.target.result, quantization)
 		};
 	})(chart);
 

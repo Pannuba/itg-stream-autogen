@@ -6,16 +6,28 @@
 <title>strm</title>
 <link rel="icon" type="image/png" href="favicon.png"/>
 <link rel="stylesheet" type="text/css" href="styles/base.css">
-<link rel="stylesheet" type="text/css" href="styles/about.css">
 </head>
 <body>
 	<div id="title">
 		<h1>sream</h1>
 	</div>
 	<div id="main-container">
-		<label for="uploadform">giv chart</label>
-		<input type="file" id="chart" accept=".sm, .ssc"/>
-		<input type="submit" id="separti" value="se parti" onclick="readFile()"/>
+		<form action="" method="post" class="form">
+			<label for="chart">giv chart</label>
+			<input type="file" name="chart" id="chart" accept=".sm, .ssc"/>
+			<select id="quantization">
+				<option value="4">4ths</option>
+				<option value="8">8ths</option>
+				<option value="16" selected="selected">16ths</option>
+				<option value="24">24ths</option>
+				<option value="32">32nds</option>
+			</select>
+			<br>
+			<label for="customquant">Custom quantization (will override dropdown selection)</label>
+			<input type="number" id="customquant" name="customquant" min="0" max="1000" />
+			<br>
+			<input type="submit" id="separti" value="se parti" onclick="seParti()"/>
+		</form>
 	</div>
 	<script src="StreamBlock.js" type="text/javascript"></script>
 	<script src="gen.js" type="text/javascript"></script>
