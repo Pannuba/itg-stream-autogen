@@ -68,14 +68,14 @@ function addPattern(isNotCandle = true, stream)	// Passs stream object, keep "la
 			do {
 				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromLeftPatterns : startFromRightPatterns);
 				console.log(pattern[1]);
-			} while (pattern[1] == candlePattern[1] || lastPatterns.includes(pattern));
+			} while (pattern[1] == candlePattern[1]);
 		}
 
 		else	// candlePattern.length = 1 | 3
 		{
 			do {
 				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);				console.log(pattern[1]);
-			} while (pattern[1] == candlePattern.slice(-1) || lastPatterns.includes(pattern));
+			} while (pattern[1] == candlePattern.slice(-1));
 		}
 	}
 
