@@ -6,10 +6,14 @@ const nextArrowRightPatterns = ['RUDL', 'RDUL', 'LDUDL', 'LUDUL', 'LUL', 'LDL']
 const startFromLeftPatterns = {'LDUR' : 29, 'LUDR' : 29, 'LDUDL' : 3, 'LUDUL' : 3, 'LUL' : 18, 'LDL' : 18}
 // Yeah
 const startFromRightPatterns = {'RUDL' : 29, 'RDUL' : 29, 'RUDUR' : 3, 'RDUDR' : 3, 'RUR' : 18, 'RDR' : 18 }
+// Candle down with left or right foot
+const candleDownDict = {'D' : 40, 'DU' : 50, 'DUD' : 10 }
+// Candle up with left or right foot
+const candleUpDict = {'U' : 40, 'UD' : 50, 'UDU' : 10 }
 
 const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
 // Last N patterns (3 for now). If a pattern to be added is in this list, it is discarded
-var lastPatterns = ['X', 'X', 'X']	// Initialize with dummy values. Make part of StreamBlock?
+var lastPatterns = ['X', 'X']	// Initialize with dummy values. Make part of StreamBlock?
 
 function generateStream(measures, quantization = 16)
 {
@@ -23,8 +27,7 @@ function generateStream(measures, quantization = 16)
 
 	while (arrowsToGenerate > 0)
 	{
-		stream = addPattern(1, stream);	// if 0 candle, if 1 2 3 4 no
-		//stream = addPattern(Math.floor(Math.random() * 5), stream);	// if 0 candle, if 1 2 3 4 no
+		stream = addPattern(Math.floor(Math.random() * 6), stream);	// if 0 candle, if 1 2 3 4 no
 		arrowsToGenerate -= stream.lastPattern.length;
 	}
 
@@ -34,6 +37,8 @@ function generateStream(measures, quantization = 16)
 
 function addPattern(isNotCandle = true, stream)	// Passs stream object, keep "lastPattern" in stream class? TODO
 {
+	console.log("lastpatterns:")
+	console.log(lastPatterns)
 	console.log("adding pattern ");
 	if (isNotCandle)
 	{
@@ -42,35 +47,36 @@ function addPattern(isNotCandle = true, stream)	// Passs stream object, keep "la
 		} while (lastPatterns.includes(pattern))
 	}
 
-	else	// isNotCandle is not zero
+	else	// isNotCandle is not zero. TODO(?) balance candles more (aka after x patterns if still no candle add one
+			// and/or remove this and add pre-made candles to the dictionaries
 	{
 		console.log("candle");
-		var secondToLastArrow = stream.lastPattern.slice(-2, -1)
+		var secondToLastArrow = stream.lastPattern.slice(-2, -1);
+		var candlePattern;
 
-		if (secondToLastArrow == 'U')
-			stream.arrows.push(arrowsDict['D']);
-		
-		if (secondToLastArrow == 'D')
-			stream.arrows.push(arrowsDict['U']);
+		(secondToLastArrow == 'U') ? candlePattern = chooseNextPattern(candleDownDict) : candlePattern = chooseNextPattern(candleUpDict);
 
-		if (nextArrowLeftPatterns.includes(stream.lastPattern))
+		// TODO make function
+		convertPatternToList(candlePattern).forEach(arrow => {
+			stream.arrows.push(arrow);
+		});
+
+		// Gets stuck if I put the lastPatterns check. Fixed by reducing lastPatterns to 2 from 3.
+
+		if (candlePattern.length == 2)
 		{
 			do {
-				pattern = chooseNextPattern(startFromRightPatterns);
+				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromLeftPatterns : startFromRightPatterns);
 				console.log(pattern[1]);
-			} while (pattern[1] == 'U' || lastPatterns.includes(pattern));
-			// I dont want that the chosen pattern has D as second arrow
+			} while (pattern[1] == candlePattern[1] || lastPatterns.includes(pattern));
 		}
-		
-		else if (nextArrowRightPatterns.includes(stream.lastPattern))
+
+		else	// candlePattern.length = 1 | 3
 		{
 			do {
-				pattern = chooseNextPattern(startFromLeftPatterns);
-			// I dont want that the chosen pattern has U as second arrow
-			} while (pattern[1] == 'D' || lastPatterns.includes(pattern));
+				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);				console.log(pattern[1]);
+			} while (pattern[1] == candlePattern.slice(-1) || lastPatterns.includes(pattern));
 		}
-
-
 	}
 
 	stream.lastPattern = pattern;
@@ -91,7 +97,6 @@ function addPattern(isNotCandle = true, stream)	// Passs stream object, keep "la
 
 function chooseNextPattern(patternDict)
 {
-	console.log(patternDict)
 	var totalWeight = 100;
 	var num = Math.floor(Math.random() * (totalWeight - 1));
 
