@@ -15,7 +15,7 @@ const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
 // Last N patterns (3 for now). If a pattern to be added is in this list, it is discarded
 var lastPatterns = ['X', 'X']	// Initialize with dummy values. Make part of StreamBlock?
 
-function generateStream(measures, quantization = 16)
+function generateStream(measures, quantization, candleDens)
 {
 	// Right now it only creates a list of arrows, will turn it to measures/, later, strem class etc
 	stream = new StreamBlock(measures, quantization);
@@ -27,7 +27,8 @@ function generateStream(measures, quantization = 16)
 
 	while (arrowsToGenerate > 0)
 	{
-		stream = addPattern(Math.floor(Math.random() * 6), stream);	// if 0 candle, if 1 2 3 4 no
+		// TODO: implement random thing like tetris where after every n ALWAYS pick candle
+		stream = addPattern(Math.floor(Math.random() * candleDens), stream);	// if 0 candle, if 1 2 3 4 no
 		arrowsToGenerate -= stream.lastPattern.length;
 	}
 
@@ -152,7 +153,7 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 	// turn outputlines into file, output.sm
 }
 
-function main(chart, quantization)
+function main(chart, quantization = 16, candleDens = 8)
 {
 	console.log(chart)
 	do {
@@ -195,7 +196,7 @@ function main(chart, quantization)
 		console.log("end strm: ", streamEnd)
 		console.log("measures: ", measures)
 
-		stream = generateStream(measures, quantization)	// Generate n measures of 16ths
+		stream = generateStream(measures, quantization, candleDens)	// Generate n measures of 16ths
 
 		chart = getNewChart(stream, streamBegin, streamEnd, lines);
 	} while (!noMoreStreams) // faking
@@ -218,6 +219,7 @@ function seParti()
 	var chart = document.getElementById('chart').files[0];
 	var quantization = document.getElementById('quantization').value;
 	var customQuant = document.getElementById("customquant").value;
+	var candleDens = document.getElementById("candles").value;
 
 	if (customQuant && customQuant != 0) quantization = customQuant;
 
@@ -228,7 +230,7 @@ function seParti()
 	{
 		return function(e)
 		{
-			main(e.target.result, quantization)
+			main(e.target.result, quantization, candleDens)
 		};
 	})(chart);
 
