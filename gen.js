@@ -132,11 +132,9 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 	var isStreamAdded = false
 
 	inputLines.forEach((line, i) => {
-		console.log("curr line", line)
 		
 		if (i < streamBegin || i > (streamEnd + 1))	// We're before/after the generated stream
 		{
-			console.log("adding out", line)
 			outputLines.push(line)
 		}
 
@@ -144,7 +142,6 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 		{
 			// add stream
 			stream.addCommas().forEach((line, j) => {
-				console.log("adding in", line)
 				outputLines.push(line)
 			});
 			isStreamAdded = true;
@@ -157,7 +154,7 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 
 function main(chart, quantization = 16, candleDens = 8)
 {
-	console.log(chart)
+	//console.log(chart)
 	do {
 		noMoreStreams = true;
 		lines = chart.split('\n');	// List of strings, each one is a line
@@ -194,9 +191,12 @@ function main(chart, quantization = 16, candleDens = 8)
 		console.log("end strm: ", streamEnd)
 		console.log("measures: ", measures)
 
-		stream = generateStream(measures, quantization, candleDens)	// Generate n measures of 16ths
-
-		chart = getNewChart(stream, streamBegin, streamEnd, lines);
+		if (!noMoreStreams)
+		{
+			stream = generateStream(measures, quantization, candleDens)	// Generate n measures of 16ths
+			chart = getNewChart(stream, streamBegin, streamEnd, lines);
+			console.log(chart)
+		}
 	} while (!noMoreStreams) // faking
 
 	console.log("OUTPUT CHART");
