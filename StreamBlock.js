@@ -9,7 +9,7 @@ class StreamBlock {
 		this.lastPattern = null;
 	}
   
-	addCommas()	// Puts the , every *quantization* arrows (e.g. every 16 arrows)
+	addCommas()	// Puts the ',' every *quantization* arrows (e.g. , every 16 arrows)
 	{
 		var finalStream = [];
 		var count = 0;

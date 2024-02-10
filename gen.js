@@ -123,26 +123,28 @@ function convertPatternToList(pattern)
 	return list;
 }
 
-
+// Called for each stream block. Writes the whole output chart
 function getNewChart(stream, streamBegin, streamEnd, inputLines)
 {
 	var outputLines = [];
 
 	streamLineCounter = 0
 	var isStreamAdded = false
-	console.log(stream.addCommas())
 
 	inputLines.forEach((line, i) => {
+		console.log("curr line", line)
 		
-		if (i < streamBegin || i > (streamEnd + 1))
+		if (i < streamBegin || i > (streamEnd + 1))	// We're before/after the generated stream
 		{
+			console.log("adding out", line)
 			outputLines.push(line)
 		}
 
-		else if (!isStreamAdded)
+		else if (!isStreamAdded)	// Put the generated stream instead of the quad hold
 		{
 			// add stream
 			stream.addCommas().forEach((line, j) => {
+				console.log("adding in", line)
 				outputLines.push(line)
 			});
 			isStreamAdded = true;
@@ -160,14 +162,15 @@ function main(chart, quantization = 16, candleDens = 8)
 		noMoreStreams = true;
 		lines = chart.split('\n');	// List of strings, each one is a line
 
-		var streamCounter = 0, streamBegin = 0, streamEnd = 0, insideStream = false;
-		for (const [i, line] of lines.entries())
-		{		
+		var measures = 0, streamBegin = 0, streamEnd = 0, insideStream = false;
+		for (let i = 0; i < lines.length; i++)
+		{
+			var line = lines[i];	// seta ultra
+
 			if (line == "2222")	// Start of quad hold
 			{
 				noMoreStreams = false;
 				insideStream = true;
-				streamCounter += 1;
 				streamBegin = i;
 			}
 
@@ -175,13 +178,11 @@ function main(chart, quantization = 16, candleDens = 8)
 			{
 				console.log("processing line", line);
 
-				if (line == "0000")
-				{
-					streamCounter += 1;
-				}
+				if (line == ",") measures++;
 
 				if (line == "3333")
 				{
+					if (lines[i++] == "," || lines[i++] == ";") measures++;
 					streamEnd = i;
 					insideStream = false;
 					break;
@@ -189,9 +190,6 @@ function main(chart, quantization = 16, candleDens = 8)
 			}
 		}
 
-		measures = streamCounter / 4;
-
-		console.log("counter : ", streamCounter)
 		console.log("start st: ", streamBegin)
 		console.log("end strm: ", streamEnd)
 		console.log("measures: ", measures)
