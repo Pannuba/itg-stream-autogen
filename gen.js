@@ -1,4 +1,3 @@
-const StreamBlock = require('./StreamBlock.js');
 // Patterns that start with a foot, and the next one starts with the left arrow
 const nextArrowLeftPatterns = ['LDUR', 'LUDR', 'RUDUR', 'RDUDR', 'RUR', 'RDR']
 // Patterns that start with a foot, and the next one starts with the right arrow
@@ -35,7 +34,7 @@ function generateStream(measures, quantization = 16)
 
 function addPattern(isNotCandle = true, stream)	// Passs stream object, keep "lastPattern" in stream class? TODO
 {
-	process.stdout.write("adding pattern ");
+	console.log("adding pattern ");
 	if (isNotCandle)
 	{
 		do {
@@ -53,31 +52,6 @@ function addPattern(isNotCandle = true, stream)	// Passs stream object, keep "la
 		
 		if (secondToLastArrow == 'D')
 			stream.arrows.push(arrowsDict['U']);
-		
-
-
-
-		/*if (nextArrowLeftPatterns.includes(stream.lastPattern))
-			pattern = chooseNextPattern(startFromRightPatterns)
-		
-		else if (nextArrowRightPatterns.includes(stream.lastPattern))
-			pattern = chooseNextPattern(startFromLeftPatterns)*/
-
-
-
-		
-		// It simply added the pattern without the check before, but resulted in mega luchis
-		/*if (nextArrowLeftPatterns.includes(stream.lastPattern))
-			dict = startFromRightPatterns;
-		
-		else if (nextArrowRightPatterns.includes(stream.lastPattern))
-			dict = startFromLeftPatterns;
-		
-		do {
-			pattern = chooseNextPattern(dict);	 
-		} while (lastPatterns.includes(pattern))*/
-
-		// TODO: TOO MANY DRILLS!!!!!!
 
 		if (nextArrowLeftPatterns.includes(stream.lastPattern))
 		{
@@ -173,13 +147,9 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 	// turn outputlines into file, output.sm
 }
 
-function main()
+function main(chart)
 {
-	fs = require('fs');
-	// Input has 4 selected measures. starts at line 1744
-	chart = fs.readFileSync('./input.sm').toString();
-
-
+	console.log(chart)
 	do {
 		noMoreStreams = true;
 		lines = chart.split('\n');	// List of strings, each one is a line
@@ -223,13 +193,35 @@ function main()
 		stream = generateStream(measures, 16)	// Generate n measures of 16ths
 
 		chart = getNewChart(stream, streamBegin, streamEnd, lines);
-	} while (!noMoreStreams)
+	} while (!noMoreStreams) // faking
+
+	console.log("OUTPUT CHART");
+	console.log(chart);
+	var blob = new Blob([chart], { type: 'text/plain' });
+	var file = new File([blob], "output.sm", {type: "text/plain"});
 	
-	
-	fs.writeFileSync('output.sm', chart);
+	const link = document.createElement("a");
+	link.style.display = "none";
+	link.href = URL.createObjectURL(file);
+	link.download = file.name;
+	document.body.appendChild(link);
+	link.click();
 }
-  
-if (require.main === module)
+
+function readFile()
 {
-	main();
+	var chart = document.getElementById('chart').files[0]; // FileList object
+	console.log(chart);
+
+	var reader = new FileReader();
+
+	reader.onload = (function()
+	{
+		return function(e)
+		{
+			main(e.target.result)
+		};
+	})(chart);
+
+	reader.readAsText(chart);
 }

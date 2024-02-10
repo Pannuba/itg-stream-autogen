@@ -27,5 +27,3 @@ class StreamBlock {
 		return finalStream;
 	}
 }
-
-module.exports = StreamBlock
