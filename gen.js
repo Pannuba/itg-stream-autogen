@@ -213,15 +213,15 @@ function main(chart, quantization = 16, candleDens = 8)
 
 				for (let j = i - 1; j > 0; j--)	// goes back line by line from the 2222
 				{
-					if (lines[j] != "," && lines[j] != "0000")
+					if (lines[j] == ",") break;
+					//if (lines[j] != "," && lines[j] != "0000") was like this and if , break was AFTER
+					if (lines[j] != "0000")
 					{
 						console.log("lines[j] = ", lines[j])
 						console.log("skipping measure")
 						skipMeasure = true;
 						break;
 					}
-
-					if (lines[j] == ",") break;
 				}
 
 				if (skipMeasure)	// If there already are arrows in the measure where quad hold starts
@@ -244,7 +244,7 @@ function main(chart, quantization = 16, candleDens = 8)
 					lines[i] = "0000"
 					var gap = 0;
 					for (let j = i - 1; lines[j] != ','; --j)	// Calculates distance between 2222 and beginning of current measure
-						gap++;
+						gap++;	// TODO: find this where i put comment "goes back line by line from 2222
 					
 					streamBegin = i - gap;	// gap must be 0 if 2222 is at beginning of measure!
 					console.log("gap = ", gap, ", i = ", i)
@@ -267,11 +267,22 @@ function main(chart, quantization = 16, candleDens = 8)
 					streamEnd = i;
 					insideStream = false;
 
-					if (lines[++i] == "," || lines[++i] == ";")
+					var gap = 0;
+
+					for (let j = i + 1; j < lines.length; ++j)	// Goes from 3333 to the next ,
 					{
-						// TODO: execute this if there ONLY are 0000 between 3333 and ,!!! right now only "3333 ,"
-						measures++;	// adds measure if there's nothing between end of quad hold and end of measure
-						streamEnd += 2;	// TODO: remove magic numbers
+						if (lines[j] == "," || lines[j] == ";")
+						{
+							measures++;	// adds measure if there's nothing between end of quad hold and end of measure
+							streamEnd = streamEnd + gap + 2;
+							break;
+						}
+
+						if (lines[j] != "0000")	// If there's something between 3333 and next ',', skip measure
+							break;
+
+
+						gap++;
 					}
 
 					break;
