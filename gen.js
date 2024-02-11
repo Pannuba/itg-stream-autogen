@@ -132,11 +132,11 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 	var isStreamAdded = false
 
 	inputLines.forEach((line, i) => {
-		console.log("processing", line, ", i = ", i)
+		//console.log("processing", line, ", i = ", i)
 		if (i < streamBegin || i > (streamEnd - 1))	// We're before/after the generated stream
 		{
-			console.log("adding", line)
-			console.log(line, "is before ", streamBegin, " and after ", streamEnd)
+			//console.log("adding", line)
+			//console.log(line, "is before ", streamBegin, " and after ", streamEnd)
 			outputLines.push(line)
 		}
 
@@ -177,8 +177,8 @@ function findFirstArrow(lines, i)
 				if (["1000", "0001"].includes(lines[k]))
 				{
 					patt.unshift(lines[k])
-					console.log("PATT")
-					console.log(patt)
+					//console.log("PATT")
+					//console.log(patt)
 					// If patt has an even number of arrows, firstArrow is the first one of patt (L/R). If odd, it's the opposite
 					// TODO: remove duplicates in a row (jacks)
 					if ( (patt.length % 2) && (patt[0] == "1000")) return 'R';
@@ -253,7 +253,7 @@ function findStreamEnd(lines, i)
 			streamEnd = streamEnd - gap;
 			break;
 		}
-		
+
 		gap++;
 	}
 	console.log("gap: ", gap)
@@ -279,10 +279,12 @@ function main(chart, quantization = 16, candleDens = 8)
 				firstArrow = findFirstArrow(lines, i);
 				console.log("firstARROW", firstArrow);
 				noMoreStreams = false;
+				console.log("streamBegin: ", streamBegin)
+				console.log("i: ", i)				
 				insideStream = true;
 			}
 
-			if (insideStream)
+			if (insideStream && i >= streamBegin)	// Additional check if first measure was skipped (otherwise it creates one more measures bc it saw the comma)
 			{
 				console.log("processing line", line);
 
@@ -290,6 +292,7 @@ function main(chart, quantization = 16, candleDens = 8)
 
 				if (line == "3333")
 				{
+					console.log("aa")
 					streamEnd = findStreamEnd(lines, i, measures);
 
 					insideStream = false;
