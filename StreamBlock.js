@@ -1,10 +1,10 @@
 class StreamBlock {
 
-	constructor(measures, quantization)
+	constructor(measures, quantization, firstArrow)
 	{
 		this.measures = measures;
 		this.quantization = quantization;
-		this.nextArrow = 'R';
+		this.nextArrow = firstArrow;
 		this.arrows = [];
 		this.lastPattern = null;
 	}

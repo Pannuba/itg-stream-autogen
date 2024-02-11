@@ -15,10 +15,10 @@ const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
 // Last N patterns (3 for now). If a pattern to be added is in this list, it is discarded
 var lastPatterns = ['X', 'X']	// Initialize with dummy values. Make part of StreamBlock?
 
-function generateStream(measures, quantization, candleDens)
+function generateStream(measures, quantization, candleDens, firstArrow)
 {
 	// Right now it only creates a list of arrows, will turn it to measures/, later, strem class etc
-	stream = new StreamBlock(measures, quantization);
+	stream = new StreamBlock(measures, quantization, firstArrow);
 
 	// Need to generate measures * quantization arrows. Doesn't have to be precise, not a problem if it generates more than needed
 	arrowsToGenerate = measures * quantization;
@@ -28,7 +28,7 @@ function generateStream(measures, quantization, candleDens)
 	while (arrowsToGenerate > 0)
 	{
 		// TODO: implement random thing like tetris where after every n ALWAYS pick candle
-		stream = addPattern(Math.floor(Math.random() * candleDens), stream);	// if 0 candle, if 1 2 3 4 no
+		stream = addPattern(Math.floor(Math.random() * candleDens), stream);	// if 0 candle, if > 0 no
 		arrowsToGenerate -= stream.lastPattern.length;
 	}
 
@@ -36,7 +36,7 @@ function generateStream(measures, quantization, candleDens)
 	return stream;
 }
 
-function addPattern(isNotCandle = true, stream)	// Passs stream object, keep "lastPattern" in stream class? TODO
+function addPattern(isNotCandle = true, stream)
 {
 	console.log("lastpatterns:")
 	console.log(lastPatterns)
@@ -155,6 +155,45 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 	// turn outputlines into file, output.sm
 }
 
+// Looks at the arrows before the stream block to see if it should start with left or right
+function findFirstArrow(lines, i)
+{
+	for (let j = i; j > 0; j--)	// goes back line by line from the 2222
+	{
+		if (["1000", "1100", "1010"].includes(lines[j])) return 'R';
+		
+		if (["0001", "0011", "0101"].includes(lines[j])) return 'L';
+
+		if (lines[j] == "0010" || lines[j] == "0100")	// Builds pattern of last arrows, then analyses it
+		{
+			patt = [lines[j]]
+			for (let k = --j; k > 0; k--)
+			{
+				if (["0100", "0010"].includes(lines[k]))
+				{
+					patt.unshift(lines[k])
+				}
+
+				if (["1000", "0001"].includes(lines[k]))
+				{
+					patt.unshift(lines[k])
+					console.log("PATT")
+					console.log(patt)
+					// If patt has an even number of arrows, firstArrow is the first one of patt (L/R). If odd, it's the opposite
+					// TODO: remove duplicates in a row (jacks)
+					if ( (patt.length % 2) && (patt[0] == "1000")) return 'R';
+					if ( (patt.length % 2) && (patt[0] == "0001")) return 'L';
+					if (!(patt.length % 2) && (patt[0] == "0001")) return 'R';
+					if (!(patt.length % 2) && (patt[0] == "1000")) return 'L';
+				}
+
+			}
+		}
+	}
+
+	return 'R';	// Fallback
+}
+
 function main(chart, quantization = 16, candleDens = 8)
 {
 	//console.log(chart)
@@ -162,13 +201,15 @@ function main(chart, quantization = 16, candleDens = 8)
 		noMoreStreams = true;
 		lines = chart.split('\n');	// List of strings, each one is a line
 
-		var measures = 0, streamBegin = 0, streamEnd = 0, insideStream = false;
+		var measures = 0, streamBegin = 0, streamEnd = 0, insideStream = false, firstArrow = '';
 		for (let i = 0; i < lines.length; i++)
 		{
 			var line = lines[i];	// seta ultra
 
 			if (line == "2222")	// Start of quad hold
 			{
+				firstArrow = findFirstArrow(lines, i);
+				console.log("firstARROW", firstArrow);
 				noMoreStreams = false;
 				insideStream = true;
 				streamBegin = i;
@@ -202,7 +243,7 @@ function main(chart, quantization = 16, candleDens = 8)
 
 		if (!noMoreStreams)
 		{
-			stream = generateStream(measures, quantization, candleDens)	// Generate n measures of 16ths
+			stream = generateStream(measures, quantization, candleDens, firstArrow)	// Generate n measures of 16ths
 			chart = getNewChart(stream, streamBegin, streamEnd, lines);
 		}
 	} while (!noMoreStreams) // faking
