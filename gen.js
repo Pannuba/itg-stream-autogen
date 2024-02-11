@@ -239,28 +239,26 @@ function findStreamBegin(lines, i)
 	return streamBegin;
 }
 
-function findStreamEnd(lines, i, measures)
+function findStreamEnd(lines, i)
 {
 	streamEnd = i;
+	lines[i] = "0000";
 
 	var gap = 0;
 
-	for (let j = i + 1; j < lines.length; ++j)	// Goes from 3333 to the next ,
+	for (let j = i - 1; j > 0; j--)	// Goes from 3333 to the PREVIOUS ,
 	{
-		if (lines[j] == "," || lines[j] == ";")
+		if (lines[j] == ",")
 		{
-			measures++;	// adds measure if there's nothing between end of quad hold and end of measure
-			streamEnd = streamEnd + gap + 2;
+			streamEnd = streamEnd - gap;
 			break;
 		}
-
-		if (lines[j] != "0000")	// If there's something between 3333 and next ',', skip measure
-			break;
-
+		
 		gap++;
 	}
+	console.log("gap: ", gap)
 
-	return [streamEnd, measures];
+	return streamEnd;
 }
 
 function main(chart, quantization = 16, candleDens = 8)
@@ -292,7 +290,8 @@ function main(chart, quantization = 16, candleDens = 8)
 
 				if (line == "3333")
 				{
-					[streamEnd, measures] = findStreamEnd(lines, i, measures);
+					streamEnd = findStreamEnd(lines, i, measures);
+
 					insideStream = false;
 					break;
 				}
