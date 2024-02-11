@@ -193,6 +193,76 @@ function findFirstArrow(lines, i)
 	return 'R';	// Fallback
 }
 
+function findStreamBegin(lines, i)
+{
+	var skipMeasure = false;
+
+	for (let j = i - 1; j > 0; j--)	// goes back line by line from the 2222
+	{
+		if (lines[j] == ",") break;
+
+		if (lines[j] != "0000")
+		{
+			console.log("lines[j] = ", lines[j])
+			console.log("skipping measure")
+			skipMeasure = true;
+			break;
+		}
+	}
+
+	if (skipMeasure)	// If there already are arrows in the measure where quad hold starts
+	{
+		lines[i] = "0000";	// Replace 2222 with empty space
+		var gap = 0;
+
+		for (let j = i; lines[j] != ','; j++)	// Calculates distance between 2222 and beginning of next measure
+			gap++;
+		
+		gap++;
+		console.log("gap = ", gap, ", i = ", i)
+		streamBegin = i + gap;	// i is the old 2222's position
+	}
+
+	else	// If 2222 is at beginning of measure, or there are only 0000 between , and 2222
+	{
+		console.log("not skipping measure")
+		console.log("replacing ", lines[i], "with 0000");
+		lines[i] = "0000"
+		var gap = 0;
+		for (let j = i - 1; lines[j] != ','; --j)	// Calculates distance between 2222 and beginning of current measure
+			gap++;	// TODO: find this where i put comment "goes back line by line from 2222
+		
+		streamBegin = i - gap;	// gap must be 0 if 2222 is at beginning of measure!
+		console.log("gap = ", gap, ", i = ", i)
+	}
+
+	return streamBegin;
+}
+
+function findStreamEnd(lines, i, measures)
+{
+	streamEnd = i;
+
+	var gap = 0;
+
+	for (let j = i + 1; j < lines.length; ++j)	// Goes from 3333 to the next ,
+	{
+		if (lines[j] == "," || lines[j] == ";")
+		{
+			measures++;	// adds measure if there's nothing between end of quad hold and end of measure
+			streamEnd = streamEnd + gap + 2;
+			break;
+		}
+
+		if (lines[j] != "0000")	// If there's something between 3333 and next ',', skip measure
+			break;
+
+		gap++;
+	}
+
+	return [streamEnd, measures];
+}
+
 function main(chart, quantization = 16, candleDens = 8)
 {
 	//console.log(chart)
@@ -205,51 +275,9 @@ function main(chart, quantization = 16, candleDens = 8)
 		{
 			var line = lines[i];	// seta ultra
 
-			// Se tra l'inizio della measure (,) e il 2222 non c'è niente (0000), aggiungi una measure (E TOGLI GLI ZERI) (if linea prima di 2222 non è ,, controlla se in mezzo ci sono solo 0000)
-			// Se invece c'è qualcosa, calcola distanza tra 2222 e inizio nuova measure (posizione dopo ,), e  quello sarà streambegin, E metti 0000 al posto di 2222
 			if (line == "2222")	// Start of quad hold
 			{
-				var skipMeasure = false;
-
-				for (let j = i - 1; j > 0; j--)	// goes back line by line from the 2222
-				{
-					if (lines[j] == ",") break;
-					//if (lines[j] != "," && lines[j] != "0000") was like this and if , break was AFTER
-					if (lines[j] != "0000")
-					{
-						console.log("lines[j] = ", lines[j])
-						console.log("skipping measure")
-						skipMeasure = true;
-						break;
-					}
-				}
-
-				if (skipMeasure)	// If there already are arrows in the measure where quad hold starts
-				{
-					lines[i] = "0000";	// Replace 2222 with empty space
-					var gap = 0;
-
-					for (let j = i; lines[j] != ','; j++)	// Calculates distance between 2222 and beginning of next measure
-						gap++;
-					
-					gap++;
-					console.log("gap = ", gap, ", i = ", i)
-					streamBegin = i + gap;	// i is the old 2222's position
-				}
-
-				else	// If 2222 is at beginning of measure, or there are only 0000 between , and 2222
-				{
-					console.log("not skipping measure")
-					console.log("replacing ", lines[i], "with 0000");
-					lines[i] = "0000"
-					var gap = 0;
-					for (let j = i - 1; lines[j] != ','; --j)	// Calculates distance between 2222 and beginning of current measure
-						gap++;	// TODO: find this where i put comment "goes back line by line from 2222
-					
-					streamBegin = i - gap;	// gap must be 0 if 2222 is at beginning of measure!
-					console.log("gap = ", gap, ", i = ", i)
-
-				}
+				streamBegin = findStreamBegin(lines, i);
 				firstArrow = findFirstArrow(lines, i);
 				console.log("firstARROW", firstArrow);
 				noMoreStreams = false;
@@ -264,27 +292,8 @@ function main(chart, quantization = 16, candleDens = 8)
 
 				if (line == "3333")
 				{
-					streamEnd = i;
+					[streamEnd, measures] = findStreamEnd(lines, i, measures);
 					insideStream = false;
-
-					var gap = 0;
-
-					for (let j = i + 1; j < lines.length; ++j)	// Goes from 3333 to the next ,
-					{
-						if (lines[j] == "," || lines[j] == ";")
-						{
-							measures++;	// adds measure if there's nothing between end of quad hold and end of measure
-							streamEnd = streamEnd + gap + 2;
-							break;
-						}
-
-						if (lines[j] != "0000")	// If there's something between 3333 and next ',', skip measure
-							break;
-
-
-						gap++;
-					}
-
 					break;
 				}
 			}
