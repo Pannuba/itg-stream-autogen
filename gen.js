@@ -186,7 +186,6 @@ function findFirstArrow(lines, i)
 					if (!(patt.length % 2) && (patt[0] == "0001")) return 'R';
 					if (!(patt.length % 2) && (patt[0] == "1000")) return 'L';
 				}
-
 			}
 		}
 	}
