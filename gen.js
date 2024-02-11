@@ -173,6 +173,8 @@ function findFirstArrow(lines, i)
 				if (["1000", "0001"].includes(lines[k]))
 				{
 					patt.unshift(lines[k])
+					console.log(patt)
+					//patt = str.replace(/(.)\1+/g, '$1')
 					// If patt has an even number of arrows, firstArrow is the first one of patt (L/R). If odd, it's the opposite
 					// TODO: remove duplicates in a row (jacks)
 					if ( (patt.length % 2) && (patt[0] == "1000")) return 'R';
@@ -252,7 +254,7 @@ function findStreamEnd(lines, i)
 	return streamEnd;
 }
 
-function main(chart, quantization = 16, candleDens = 8)
+function main(chart, quantHolds = 16, quantRolls = 8, candleDens = 8)
 {
 	//console.log(chart)
 	do {
@@ -260,15 +262,17 @@ function main(chart, quantization = 16, candleDens = 8)
 		lines = chart.split('\n');	// List of strings, each one is a line
 
 		var measures = 0, streamBegin = 0, streamEnd = 0, insideStream = false, firstArrow = '';
+		var quantization;
 		for (let i = 0; i < lines.length; i++)
 		{
 			var line = lines[i];	// seta ultra
 
-			if (line == "2222")	// Start of quad hold
+			if (line == "2222" || line == "4444")	// Start of quad hold
 			{
+				quantization = (line[0] == '2' ? quantHolds : quantRolls);	// Use quant1 for 4xhold, quant2 for 4xrolls
 				streamBegin = findStreamBegin(lines, i);
 				firstArrow = findFirstArrow(lines, i);
-				//console.log("firstARROW", firstArrow);
+				console.log("firstARROW", firstArrow);
 				noMoreStreams = false;			
 				insideStream = true;
 			}
@@ -314,11 +318,14 @@ function main(chart, quantization = 16, candleDens = 8)
 function seParti()
 {
 	var chart = document.getElementById('chart').files[0];
-	var quantization = document.getElementById('quantization').value;
-	var customQuant = document.getElementById("customquant").value;
+	var quantHolds = document.getElementById('holds-quant').value;
+	var quantRolls = document.getElementById('rolls-quant').value;
+	var customQuantHolds = document.getElementById("customquant-holds").value;
+	var customQuantRolls = document.getElementById("customquant-rolls").value;
 	var candleDens = document.getElementById("candles").value;
 
-	if (customQuant && customQuant != 0) quantization = customQuant;
+	if (customQuantHolds && customQuantHolds != 0) quantHolds = customQuantHolds;
+	if (customQuantRolls && customQuantRolls != 0) quantRolls = customQuantRolls;
 
 
 	var reader = new FileReader();
@@ -327,7 +334,7 @@ function seParti()
 	{
 		return function(e)
 		{
-			main(e.target.result, quantization, candleDens)
+			main(e.target.result, quantHolds, quantRolls, candleDens)
 		};
 	})(chart);
 
