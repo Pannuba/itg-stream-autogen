@@ -32,7 +32,6 @@ function generateStream(measures, quantization, candleDens, firstArrow)
 		arrowsToGenerate -= stream.lastPattern.length;
 	}
 
-	console.log(stream);
 	return stream;
 }
 
@@ -75,7 +74,8 @@ function addPattern(isNotCandle = true, stream)
 		else	// candlePattern.length = 1 | 3
 		{
 			do {
-				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);				console.log(pattern[1]);
+				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);
+				console.log(pattern[1]);
 			} while (pattern[1] == candlePattern.slice(-1));
 		}
 	}
@@ -116,7 +116,6 @@ function convertPatternToList(pattern)
 
 	for (const arrow of pattern)
 	{
-		console.log(arrowsDict[arrow]);
 		list.push(arrowsDict[arrow])
 	}
 
@@ -132,11 +131,8 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 	var isStreamAdded = false
 
 	inputLines.forEach((line, i) => {
-		//console.log("processing", line, ", i = ", i)
 		if (i < streamBegin || i > (streamEnd - 1))	// We're before/after the generated stream
 		{
-			//console.log("adding", line)
-			//console.log(line, "is before ", streamBegin, " and after ", streamEnd)
 			outputLines.push(line)
 		}
 
@@ -177,8 +173,6 @@ function findFirstArrow(lines, i)
 				if (["1000", "0001"].includes(lines[k]))
 				{
 					patt.unshift(lines[k])
-					//console.log("PATT")
-					//console.log(patt)
 					// If patt has an even number of arrows, firstArrow is the first one of patt (L/R). If odd, it's the opposite
 					// TODO: remove duplicates in a row (jacks)
 					if ( (patt.length % 2) && (patt[0] == "1000")) return 'R';
@@ -203,8 +197,7 @@ function findStreamBegin(lines, i)
 
 		if (lines[j] != "0000")
 		{
-			console.log("lines[j] = ", lines[j])
-			console.log("skipping measure")
+			console.log("skipping measure");
 			skipMeasure = true;
 			break;
 		}
@@ -219,21 +212,20 @@ function findStreamBegin(lines, i)
 			gap++;
 		
 		gap++;
-		console.log("gap = ", gap, ", i = ", i)
+
 		streamBegin = i + gap;	// i is the old 2222's position
 	}
 
 	else	// If 2222 is at beginning of measure, or there are only 0000 between , and 2222
 	{
-		console.log("not skipping measure")
-		console.log("replacing ", lines[i], "with 0000");
-		lines[i] = "0000"
+		console.log("not skipping measure");
+		lines[i] = "0000";
 		var gap = 0;
+
 		for (let j = i - 1; lines[j] != ','; --j)	// Calculates distance between 2222 and beginning of current measure
 			gap++;	// TODO: find this where i put comment "goes back line by line from 2222
 		
 		streamBegin = i - gap;	// gap must be 0 if 2222 is at beginning of measure!
-		console.log("gap = ", gap, ", i = ", i)
 	}
 
 	return streamBegin;
@@ -256,7 +248,6 @@ function findStreamEnd(lines, i)
 
 		gap++;
 	}
-	console.log("gap: ", gap)
 
 	return streamEnd;
 }
@@ -277,10 +268,8 @@ function main(chart, quantization = 16, candleDens = 8)
 			{
 				streamBegin = findStreamBegin(lines, i);
 				firstArrow = findFirstArrow(lines, i);
-				console.log("firstARROW", firstArrow);
-				noMoreStreams = false;
-				console.log("streamBegin: ", streamBegin)
-				console.log("i: ", i)				
+				//console.log("firstARROW", firstArrow);
+				noMoreStreams = false;			
 				insideStream = true;
 			}
 
@@ -292,7 +281,6 @@ function main(chart, quantization = 16, candleDens = 8)
 
 				if (line == "3333")
 				{
-					console.log("aa")
 					streamEnd = findStreamEnd(lines, i, measures);
 
 					insideStream = false;
@@ -312,8 +300,6 @@ function main(chart, quantization = 16, candleDens = 8)
 		}
 	} while (!noMoreStreams) // faking
 
-	console.log("OUTPUT CHART");
-	console.log(chart);
 	var blob = new Blob([chart], { type: 'text/plain' });
 	var file = new File([blob], "output.sm", {type: "text/plain"});
 	
