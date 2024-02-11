@@ -205,13 +205,55 @@ function main(chart, quantization = 16, candleDens = 8)
 		{
 			var line = lines[i];	// seta ultra
 
+			// Se tra l'inizio della measure (,) e il 2222 non c'è niente (0000), aggiungi una measure (E TOGLI GLI ZERI) (if linea prima di 2222 non è ,, controlla se in mezzo ci sono solo 0000)
+			// Se invece c'è qualcosa, calcola distanza tra 2222 e inizio nuova measure (posizione dopo ,), e  quello sarà streambegin, E metti 0000 al posto di 2222
 			if (line == "2222")	// Start of quad hold
 			{
+				var skipMeasure = false;
+
+				for (let j = i - 1; j > 0; j--)	// goes back line by line from the 2222
+				{
+					if (lines[j] != "," && lines[j] != "0000")
+					{
+						console.log("lines[j] = ", lines[j])
+						console.log("skipping measure")
+						skipMeasure = true;
+						break;
+					}
+
+					if (lines[j] == ",") break;
+				}
+
+				if (skipMeasure)	// If there already are arrows in the measure where quad hold starts
+				{
+					lines[i] = "0000";	// Replace 2222 with empty space
+					var gap = 0;
+
+					for (let j = i; lines[j] != ','; j++)	// Calculates distance between 2222 and beginning of next measure
+						gap++;
+					
+					gap++;
+					console.log("gap = ", gap, ", i = ", i)
+					streamBegin = i + gap;	// i is the old 2222's position
+				}
+
+				else	// If 2222 is at beginning of measure, or there are only 0000 between , and 2222
+				{
+					console.log("not skipping measure")
+					console.log("replacing ", lines[i], "with 0000");
+					lines[i] = "0000"
+					var gap = 0;
+					for (let j = i - 1; lines[j] != ','; --j)	// Calculates distance between 2222 and beginning of current measure
+						gap++;
+					
+					streamBegin = i - gap;	// gap must be 0 if 2222 is at beginning of measure!
+					console.log("gap = ", gap, ", i = ", i)
+
+				}
 				firstArrow = findFirstArrow(lines, i);
 				console.log("firstARROW", firstArrow);
 				noMoreStreams = false;
 				insideStream = true;
-				streamBegin = i;
 			}
 
 			if (insideStream)
@@ -227,7 +269,8 @@ function main(chart, quantization = 16, candleDens = 8)
 
 					if (lines[++i] == "," || lines[++i] == ";")
 					{
-						measures++;	// adds measure if there's nothing between quad hold and end of measure
+						// TODO: execute this if there ONLY are 0000 between 3333 and ,!!! right now only "3333 ,"
+						measures++;	// adds measure if there's nothing between end of quad hold and end of measure
 						streamEnd += 2;	// TODO: remove magic numbers
 					}
 
