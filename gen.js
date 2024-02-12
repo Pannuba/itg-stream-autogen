@@ -1,11 +1,11 @@
 // Patterns that start with a foot, and the next one starts with the left arrow
-const nextArrowLeftPatterns = ['LDUR', 'LUDR', 'RUDUR', 'RDUDR', 'RUR', 'RDR']
+const nextArrowLeftPatterns = ['LDUR', 'LUDR', 'RUDUR', 'RDUDR', 'RUR', 'RDR', 'RDULUDR', 'RUDLDUR']
 // Patterns that start with a foot, and the next one starts with the right arrow
-const nextArrowRightPatterns = ['RUDL', 'RDUL', 'LDUDL', 'LUDUL', 'LUL', 'LDL']
+const nextArrowRightPatterns = ['RUDL', 'RDUL', 'LDUDL', 'LUDUL', 'LUL', 'LDL', 'LDURUDL', 'LUDRDUL']
 // Patterns that start with left
-const startFromLeftPatterns = {'LDUR' : 29, 'LUDR' : 29, 'LDUDL' : 3, 'LUDUL' : 3, 'LUL' : 18, 'LDL' : 18}
+const startFromLeftPatterns = {'LDUR' : 28, 'LUDR' : 28, 'LDUDL' : 4, 'LUDUL' : 4, 'LUL' : 16, 'LDL' : 16, 'LDURUDL' : 2, 'LUDRDUL' : 2}
 // Yeah
-const startFromRightPatterns = {'RUDL' : 29, 'RDUL' : 29, 'RUDUR' : 3, 'RDUDR' : 3, 'RUR' : 18, 'RDR' : 18 }
+const startFromRightPatterns = {'RUDL' : 28, 'RDUL' : 28, 'RUDUR' : 4, 'RDUDR' : 4, 'RUR' : 16, 'RDR' : 16, 'RDULUDR': 2, 'RUDLDUR' : 2}
 // Candle down with left or right foot
 const candleDownDict = {'D' : 40, 'DU' : 50, 'DUD' : 10 }
 // Candle up with left or right foot
