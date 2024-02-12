@@ -3,18 +3,19 @@ const nextArrowLeftPatterns = ['LDUR', 'LUDR', 'RUDUR', 'RDUDR', 'RUR', 'RDR', '
 // Patterns that start with a foot, and the next one starts with the right arrow
 const nextArrowRightPatterns = ['RUDL', 'RDUL', 'LDUDL', 'LUDUL', 'LUL', 'LDL', 'LDURUDL', 'LUDRDUL']
 // Patterns that start with left
-const startFromLeftPatterns = {'LDUR' : 28, 'LUDR' : 28, 'LDUDL' : 4, 'LUDUL' : 4, 'LUL' : 16, 'LDL' : 16, 'LDURUDL' : 2, 'LUDRDUL' : 2}
+const startFromLeftPatterns = {'LDUR' : 25, 'LUDR' : 25, 'LDUDL' : 6, 'LUDUL' : 6, 'LUL' : 17, 'LDL' : 17, 'LDURUDL' : 2, 'LUDRDUL' : 2}
 // Yeah
-const startFromRightPatterns = {'RUDL' : 28, 'RDUL' : 28, 'RUDUR' : 4, 'RDUDR' : 4, 'RUR' : 16, 'RDR' : 16, 'RDULUDR': 2, 'RUDLDUR' : 2}
+const startFromRightPatterns = {'RUDL' : 25, 'RDUL' : 25, 'RUDUR' : 6, 'RDUDR' : 6, 'RUR' : 17, 'RDR' : 17, 'RDULUDR': 2, 'RUDLDUR' : 2}
 // Candle down with left or right foot
 const candleDownDict = {'D' : 10, 'DU' : 80, 'DUD' : 10 }
 // Candle up with left or right foot
 const candleUpDict = {'U' : 10, 'UD' : 80, 'UDU' : 10 }
+
 //tot% double candle = 10 + 80/4 + 10 = 10 + 20 + 10 = 40% (was 40 + 40/3 + 20 = 73.3%)
 //tot% single candle = (80*3)/4 = 60% (was 40*2/3 = 26.6%)
 
 const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
-// Last N patterns (3 for now). If a pattern to be added is in this list, it is discarded
+// Last N patterns (3 for now). Only used for non-candles
 var lastPatterns = ['X', 'X']	// Initialize with dummy values. Make part of StreamBlock?
 
 function generateStream(measures, options, firstArrow)
@@ -67,18 +68,17 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 			if (Math.floor(Math.random() * 4) && !options['wtfMode'])	// 3/4ths of the time single candle. Skips for wtf mode
 			{
 				console.log("adding single candle");
-				
-				if (nextArrowLeftPatterns.includes(stream.lastPattern))
-				{
-					stream.arrows.push("1000");
-					pattern = chooseNextPattern(startFromRightPatterns);
-				}
-				
-				else
-				{
-					stream.arrows.push("0001");
-					pattern = chooseNextPattern(startFromLeftPatterns);
-				}
+
+				do {
+					if (nextArrowLeftPatterns.includes(stream.lastPattern))
+						pattern = chooseNextPattern(startFromRightPatterns);
+					
+					else
+						pattern = chooseNextPattern(startFromLeftPatterns);
+
+				} while ((pattern[1] + pattern[2] == candlePattern) && (pattern.length == 4 || pattern.length == 7)) // Prevents double stairs. Add option to allow them?
+				// Actually double stairs still happen if I have LDUR and LDURUDL in a row, noncandle. TODO add condition
+				stream.arrows.push(nextArrowLeftPatterns.includes(stream.lastPattern) ? "1000" : "0001");	// Ok because pattern is added later anyway
 			}
 			
 			else	// 1/4th of the time, double candle
@@ -87,14 +87,14 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 				
 				do {
 					pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromLeftPatterns : startFromRightPatterns);
-				} while (pattern[1] == candlePattern[1]);
+				} while (pattern[1] == candlePattern[1]);	// TODO(?) remove this condition? makes some boxes show up. Maybe add option
 			}
 		}
 		
 		else
 		{
 			console.log("adding double candle");
-			
+			// TODO I WANT UP/DOWN ANCHORS!!!!!!!!!!!
 			do {
 				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);
 			} while (pattern[1] == candlePattern.slice(-1));
