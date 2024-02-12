@@ -172,11 +172,11 @@ function findFirstArrow(lines, i)
 {
 	for (let j = i; j > 0; j--)	// goes back line by line from the 2222
 	{
-		if (["1000", "1100", "1010"].includes(lines[j])) return 'R';
+		if (["1000", "3000", "1100", "3300", "1010", "3030"].includes(lines[j])) return 'R';
 		
-		if (["0001", "0011", "0101"].includes(lines[j])) return 'L';
+		if (["0001", "0003", "0011", "0033", "0101", "0303"].includes(lines[j])) return 'L';
 
-		if (lines[j] == "0010" || lines[j] == "0100")	// Builds pattern of last arrows, then analyses it
+		if (["0100", "0010", "0300", "0030"].includes(lines[j]))	// Builds pattern of last arrows, then analyses it
 		{
 			patt = [lines[j]];
 			
