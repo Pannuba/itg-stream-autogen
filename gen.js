@@ -9,7 +9,7 @@ const startFromRightPatterns = {'RUDL' : 29, 'RDUL' : 29, 'RUDUR' : 3, 'RDUDR' :
 // Candle down with left or right foot
 const candleDownDict = {'D' : 40, 'DU' : 50, 'DUD' : 10 }
 // Candle up with left or right foot
-const candleUpDict = {'U' : 40, 'UD' : 50, 'UDU' : 10 }
+const candleUpDict = {'U' : 40, 'UD' : 50, 'UDU' : 10 } // 30 60 10
 
 const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
 // Last N patterns (3 for now). If a pattern to be added is in this list, it is discarded
@@ -36,6 +36,8 @@ function generateStream(measures, quantization, candleDens, firstArrow)
 
 function addPattern(isNotCandle = true, stream)
 {
+	var pattern = "";
+	
 	if (isNotCandle)
 	{
 		console.log("adding no");
@@ -46,7 +48,6 @@ function addPattern(isNotCandle = true, stream)
 
 	else	// isNotCandle is not zero. TODO(?) balance candles more (aka after x patterns if still no candle add one
 	{
-		console.log("adding candle");
 		var secondToLastArrow = stream.lastPattern.slice(-2, -1), candlePattern;
 
 		(secondToLastArrow == 'U') ? candlePattern = chooseNextPattern(candleDownDict) : candlePattern = chooseNextPattern(candleUpDict);
@@ -58,14 +59,43 @@ function addPattern(isNotCandle = true, stream)
 
 		// Gets stuck if I put the lastPatterns check. Fixed by reducing lastPatterns to 2 from 3.
 
-		do {
-			if (candlePattern.length == 2)
-				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromLeftPatterns : startFromRightPatterns);
-			else
-				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);
+		if (candlePattern.length == 2)
+		{
+			if (Math.floor(Math.random() * 3))	// 2/3 of the time
+			{
+				console.log("adding single candle");
+				
+				if (nextArrowLeftPatterns.includes(stream.lastPattern))
+				{
+					stream.arrows.push("1000");
+					pattern = chooseNextPattern(startFromRightPatterns);
+				}
+				
+				else
+				{
+					stream.arrows.push("0001");
+					pattern = chooseNextPattern(startFromLeftPatterns);
+				}
+			}
 			
-			console.log(pattern[1]);
-		} while (pattern[1] == candlePattern.slice(-1));
+			else	// 1/3rd of the time, double candle
+			{
+				console.log("adding double candle");
+				
+				do {
+					pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromLeftPatterns : startFromRightPatterns);
+				} while (pattern[1] == candlePattern[1]);
+			}
+		}
+		
+		else
+		{
+			console.log("adding double candle");
+			
+			do {
+				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);
+			} while (pattern[1] == candlePattern.slice(-1));
+		}
 	}
 
 	stream.lastPattern = pattern;
