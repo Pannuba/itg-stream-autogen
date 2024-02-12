@@ -17,10 +17,9 @@ var lastPatterns = ['X', 'X']	// Initialize with dummy values. Make part of Stre
 
 function generateStream(measures, quantization, candleDens, firstArrow)
 {
-	// Right now it only creates a list of arrows, will turn it to measures/, later, strem class etc
 	stream = new StreamBlock(measures, quantization, firstArrow);
 
-	// Need to generate measures * quantization arrows. Doesn't have to be precise, not a problem if it generates more than needed
+	// Doesn't have to be precise, not a problem if it generates more than needed
 	arrowsToGenerate = measures * quantization;
 
 	addPattern(true, stream);
@@ -37,22 +36,18 @@ function generateStream(measures, quantization, candleDens, firstArrow)
 
 function addPattern(isNotCandle = true, stream)
 {
-	console.log("lastpatterns:")
-	console.log(lastPatterns)
-	console.log("adding pattern ");
 	if (isNotCandle)
 	{
+		console.log("adding no");
 		do {
 			pattern = chooseNextPattern((stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
 		} while (lastPatterns.includes(pattern))
 	}
 
 	else	// isNotCandle is not zero. TODO(?) balance candles more (aka after x patterns if still no candle add one
-			// and/or remove this and add pre-made candles to the dictionaries
 	{
-		console.log("candle");
-		var secondToLastArrow = stream.lastPattern.slice(-2, -1);
-		var candlePattern;
+		console.log("adding candle");
+		var secondToLastArrow = stream.lastPattern.slice(-2, -1), candlePattern;
 
 		(secondToLastArrow == 'U') ? candlePattern = chooseNextPattern(candleDownDict) : candlePattern = chooseNextPattern(candleUpDict);
 
@@ -63,21 +58,14 @@ function addPattern(isNotCandle = true, stream)
 
 		// Gets stuck if I put the lastPatterns check. Fixed by reducing lastPatterns to 2 from 3.
 
-		if (candlePattern.length == 2)
-		{
-			do {
+		do {
+			if (candlePattern.length == 2)
 				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromLeftPatterns : startFromRightPatterns);
-				console.log(pattern[1]);
-			} while (pattern[1] == candlePattern[1]);
-		}
-
-		else	// candlePattern.length = 1 | 3
-		{
-			do {
+			else
 				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);
-				console.log(pattern[1]);
-			} while (pattern[1] == candlePattern.slice(-1));
-		}
+			
+			console.log(pattern[1]);
+		} while (pattern[1] == candlePattern.slice(-1));
 	}
 
 	stream.lastPattern = pattern;
@@ -98,8 +86,7 @@ function addPattern(isNotCandle = true, stream)
 
 function chooseNextPattern(patternDict)
 {
-	var totalWeight = 100;
-	var num = Math.floor(Math.random() * (totalWeight - 1));
+	var num = Math.floor(Math.random() * (100 - 1));	// 100 is the total weight
 
 	for (const [pattern, weight] of Object.entries(patternDict))
 	{
@@ -125,10 +112,7 @@ function convertPatternToList(pattern)
 // Called for each stream block. Writes the whole output chart
 function getNewChart(stream, streamBegin, streamEnd, inputLines)
 {
-	var outputLines = [];
-
-	streamLineCounter = 0
-	var isStreamAdded = false
+	var outputLines = [], streamLineCounter = 0, isStreamAdded = false;
 
 	inputLines.forEach((line, i) => {
 		if (i < streamBegin || i > (streamEnd - 1))	// We're before/after the generated stream
@@ -138,17 +122,16 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 
 		else if (!isStreamAdded)	// Put the generated stream instead of the quad hold
 		{
-			// add stream
 			stream.addCommas().forEach((line, j) => {
 				console.log("adding generated", line)
-				outputLines.push(line)
+				outputLines.push(line);
 			});
+			
 			isStreamAdded = true;
 		}
 	});
 
 	return outputLines.join("\n");
-	// turn outputlines into file, output.sm
 }
 
 // Looks at the arrows before the stream block to see if it should start with left or right
@@ -162,19 +145,18 @@ function findFirstArrow(lines, i)
 
 		if (lines[j] == "0010" || lines[j] == "0100")	// Builds pattern of last arrows, then analyses it
 		{
-			patt = [lines[j]]
+			patt = [lines[j]];
+			
 			for (let k = --j; k > 0; k--)
 			{
 				if (["0100", "0010"].includes(lines[k]))
 				{
-					patt.unshift(lines[k])
+					patt.unshift(lines[k]);
 				}
 
 				if (["1000", "0001"].includes(lines[k]))
 				{
-					patt.unshift(lines[k])
-					console.log(patt)
-					//patt = str.replace(/(.)\1+/g, '$1')
+					patt.unshift(lines[k]);
 					// If patt has an even number of arrows, firstArrow is the first one of patt (L/R). If odd, it's the opposite
 					// TODO: remove duplicates in a row (jacks)
 					if ( (patt.length % 2) && (patt[0] == "1000")) return 'R';
@@ -191,7 +173,7 @@ function findFirstArrow(lines, i)
 
 function findStreamBegin(lines, i)
 {
-	var skipMeasure = false;
+	var skipMeasure = false, gap = 0;
 
 	for (let j = i - 1; j > 0; j--)	// goes back line by line from the 2222
 	{
@@ -199,7 +181,7 @@ function findStreamBegin(lines, i)
 
 		if (lines[j] != "0000")
 		{
-			console.log("skipping measure");
+			console.log("skipping first measure");
 			skipMeasure = true;
 			break;
 		}
@@ -208,7 +190,6 @@ function findStreamBegin(lines, i)
 	if (skipMeasure)	// If there already are arrows in the measure where quad hold starts
 	{
 		lines[i] = "0000";	// Replace 2222 with empty space
-		var gap = 0;
 
 		for (let j = i; lines[j] != ','; j++)	// Calculates distance between 2222 and beginning of next measure
 			gap++;
@@ -220,9 +201,8 @@ function findStreamBegin(lines, i)
 
 	else	// If 2222 is at beginning of measure, or there are only 0000 between , and 2222
 	{
-		console.log("not skipping measure");
+		console.log("not skipping first measure");
 		lines[i] = "0000";
-		var gap = 0;
 
 		for (let j = i - 1; lines[j] != ','; --j)	// Calculates distance between 2222 and beginning of current measure
 			gap++;	// TODO: find this where i put comment "goes back line by line from 2222
@@ -244,7 +224,7 @@ function findStreamEnd(lines, i)
 	{
 		if (lines[j] == ",")
 		{
-			streamEnd = streamEnd - gap;
+			streamEnd -= gap;
 			break;
 		}
 
@@ -256,13 +236,11 @@ function findStreamEnd(lines, i)
 
 function main(chart, quantHolds = 16, quantRolls = 8, candleDens = 8)
 {
-	//console.log(chart)
 	do {
 		noMoreStreams = true;
 		lines = chart.split('\n');	// List of strings, each one is a line
 
-		var measures = 0, streamBegin = 0, streamEnd = 0, insideStream = false, firstArrow = '';
-		var quantization;
+		var measures = 0, streamBegin = 0, streamEnd = 0, insideStream = false, firstArrow = '', quantization;
 		for (let i = 0; i < lines.length; i++)
 		{
 			var line = lines[i];	// seta ultra
@@ -293,13 +271,11 @@ function main(chart, quantHolds = 16, quantRolls = 8, candleDens = 8)
 			}
 		}
 
-		console.log("start st: ", streamBegin)
-		console.log("end strm: ", streamEnd)
-		console.log("measures: ", measures)
+		console.log("start st: ", streamBegin, "\nend strm: ", streamEnd, "\nmeasures: ", measures)
 
 		if (!noMoreStreams)
 		{
-			stream = generateStream(measures, quantization, candleDens, firstArrow)	// Generate n measures of 16ths
+			stream = generateStream(measures, quantization, candleDens, firstArrow)
 			chart = getNewChart(stream, streamBegin, streamEnd, lines);
 		}
 	} while (!noMoreStreams) // faking
@@ -327,13 +303,10 @@ function seParti()
 	if (customQuantHolds && customQuantHolds != 0) quantHolds = customQuantHolds;
 	if (customQuantRolls && customQuantRolls != 0) quantRolls = customQuantRolls;
 
-
 	var reader = new FileReader();
 
-	reader.onload = (function()
-	{
-		return function(e)
-		{
+	reader.onload = (function() {
+		return function(e) {
 			main(e.target.result, quantHolds, quantRolls, candleDens)
 		};
 	})(chart);
