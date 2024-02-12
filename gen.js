@@ -15,26 +15,27 @@ const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
 // Last N patterns (3 for now). If a pattern to be added is in this list, it is discarded
 var lastPatterns = ['X', 'X']	// Initialize with dummy values. Make part of StreamBlock?
 
-function generateStream(measures, quantization, candleDens, firstArrow)
+function generateStream(measures, options, firstArrow)
 {
-	stream = new StreamBlock(measures, quantization, firstArrow);
+
+	stream = new StreamBlock(measures, options["quantization"], firstArrow);
 
 	// Doesn't have to be precise, not a problem if it generates more than needed
-	arrowsToGenerate = measures * quantization;
+	arrowsToGenerate = measures * options["quantization"]; // TODO(?): move in StreamBlock class
 
 	addPattern(true, stream);
 
 	while (arrowsToGenerate > 0)
 	{
 		// TODO: implement random thing like tetris where after every n ALWAYS pick candle
-		stream = addPattern(Math.floor(Math.random() * candleDens), stream);	// if 0 candle, if > 0 no
+		stream = addPattern(Math.floor(Math.random() * options["candleDens"]), stream, options);	// if 0 candle, if > 0 no
 		arrowsToGenerate -= stream.lastPattern.length;
 	}
 
 	return stream;
 }
 
-function addPattern(isNotCandle = true, stream)
+function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to only pass options and not make the first pattern a candle (easy)
 {
 	var pattern = "";
 	
@@ -61,7 +62,7 @@ function addPattern(isNotCandle = true, stream)
 
 		if (candlePattern.length == 2)
 		{
-			if (Math.floor(Math.random() * 3))	// 2/3 of the time
+			if (Math.floor(Math.random() * 3) && !options['wtfMode'])	// 2/3 of the time. Skips single candle for wtf mode
 			{
 				console.log("adding single candle");
 				
@@ -264,7 +265,7 @@ function findStreamEnd(lines, i)
 	return streamEnd;
 }
 
-function main(chart, quantHolds = 16, quantRolls = 8, candleDens = 8)
+function main(chart, options)
 {
 	do {
 		noMoreStreams = true;
@@ -277,7 +278,7 @@ function main(chart, quantHolds = 16, quantRolls = 8, candleDens = 8)
 
 			if (line == "2222" || line == "4444")	// Start of quad hold
 			{
-				quantization = (line[0] == '2' ? quantHolds : quantRolls);	// Use quant1 for 4xhold, quant2 for 4xrolls
+				options["quantization"] = (line[0] == '2' ? options['quantHolds'] : options['quantRolls']);
 				streamBegin = findStreamBegin(lines, i);
 				firstArrow = findFirstArrow(lines, i);
 				console.log("firstARROW", firstArrow);
@@ -305,7 +306,8 @@ function main(chart, quantHolds = 16, quantRolls = 8, candleDens = 8)
 
 		if (!noMoreStreams)
 		{
-			stream = generateStream(measures, quantization, candleDens, firstArrow)
+			console.log(options)
+			stream = generateStream(measures, options, firstArrow)
 			chart = getNewChart(stream, streamBegin, streamEnd, lines);
 		}
 	} while (!noMoreStreams) // faking
@@ -329,15 +331,23 @@ function seParti()
 	var customQuantHolds = document.getElementById("customquant-holds").value;
 	var customQuantRolls = document.getElementById("customquant-rolls").value;
 	var candleDens = document.getElementById("candles").value;
+	var wtfMode = (candleDens == 0) ? true : false;
 
 	if (customQuantHolds && customQuantHolds != 0) quantHolds = customQuantHolds;
 	if (customQuantRolls && customQuantRolls != 0) quantRolls = customQuantRolls;
+
+	var options = {
+		'quantHolds' : quantHolds,
+		'quantRolls' : quantRolls,
+		'candleDens' : candleDens,		// TODO: add candleDens for rolls
+		'wtfMode' : wtfMode
+	};
 
 	var reader = new FileReader();
 
 	reader.onload = (function() {
 		return function(e) {
-			main(e.target.result, quantHolds, quantRolls, candleDens)
+			main(e.target.result, options)
 		};
 	})(chart);
 
