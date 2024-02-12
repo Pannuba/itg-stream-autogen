@@ -7,9 +7,11 @@ const startFromLeftPatterns = {'LDUR' : 28, 'LUDR' : 28, 'LDUDL' : 4, 'LUDUL' : 
 // Yeah
 const startFromRightPatterns = {'RUDL' : 28, 'RDUL' : 28, 'RUDUR' : 4, 'RDUDR' : 4, 'RUR' : 16, 'RDR' : 16, 'RDULUDR': 2, 'RUDLDUR' : 2}
 // Candle down with left or right foot
-const candleDownDict = {'D' : 40, 'DU' : 50, 'DUD' : 10 }
+const candleDownDict = {'D' : 10, 'DU' : 80, 'DUD' : 10 }
 // Candle up with left or right foot
-const candleUpDict = {'U' : 40, 'UD' : 50, 'UDU' : 10 } // 30 60 10
+const candleUpDict = {'U' : 10, 'UD' : 80, 'UDU' : 10 }
+//tot% double candle = 10 + 80/4 + 10 = 10 + 20 + 10 = 40% (was 40 + 40/3 + 20 = 73.3%)
+//tot% single candle = (80*3)/4 = 60% (was 40*2/3 = 26.6%)
 
 const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
 // Last N patterns (3 for now). If a pattern to be added is in this list, it is discarded
@@ -62,7 +64,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 
 		if (candlePattern.length == 2)
 		{
-			if (Math.floor(Math.random() * 3) && !options['wtfMode'])	// 2/3 of the time. Skips single candle for wtf mode
+			if (Math.floor(Math.random() * 4) && !options['wtfMode'])	// 3/4ths of the time single candle. Skips for wtf mode
 			{
 				console.log("adding single candle");
 				
@@ -79,7 +81,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 				}
 			}
 			
-			else	// 1/3rd of the time, double candle
+			else	// 1/4th of the time, double candle
 			{
 				console.log("adding double candle");
 				
@@ -154,7 +156,7 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 		else if (!isStreamAdded)	// Put the generated stream instead of the quad hold
 		{
 			stream.addCommas().forEach((line, j) => {
-				console.log("adding generated", line)
+				//console.log("adding generated", line)
 				outputLines.push(line);
 			});
 			
