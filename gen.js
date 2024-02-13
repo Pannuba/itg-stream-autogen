@@ -167,6 +167,21 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 	return outputLines.join("\n");
 }
 
+// Removes consecutive arrows in a pattern ["1000", "0100", "0100", "0100"] --> ["1000", "0100", "1000"]
+function removeJacks(pattern)
+{
+	for (let i = 0; i < pattern.length; i++)
+	{
+		if (pattern[++i] == pattern[i])
+		{
+			pattern.splice(i, 1);
+			i--;
+		}
+	}
+	
+	return pattern;
+}
+
 // Looks at the arrows before the stream block to see if it should start with left or right
 function findFirstArrow(lines, i)
 {
@@ -191,7 +206,7 @@ function findFirstArrow(lines, i)
 				{
 					patt.unshift(lines[k]);
 					// If patt has an even number of arrows, firstArrow is the first one of patt (L/R). If odd, it's the opposite
-					// TODO: remove duplicates in a row (jacks)
+					patt = removeJacks(patt);
 					if ( (patt.length % 2) && (patt[0] == "1000")) return 'R';
 					if ( (patt.length % 2) && (patt[0] == "0001")) return 'L';
 					if (!(patt.length % 2) && (patt[0] == "0001")) return 'R';
