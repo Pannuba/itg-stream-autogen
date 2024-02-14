@@ -282,8 +282,27 @@ function findStreamEnd(lines, i)
 	return streamEnd;
 }
 
+function noPlagiarism(chart)	// TODO: calculate breakdown???????
+{
+	lines = chart.split('\n');
+	
+	for (let i = 0; i < lines.length; i++)
+	{
+		if (lines[i] == "#NOTES:")	// Step artist field is the second line after #NOTES:
+		{
+			stepArtist = lines[i+2].match(/[ a-z]*/i);	// Includes spaces before name
+			lines[i+2] = stepArtist + ", itg-stream-autogen:"
+		}
+	}
+	
+	return lines.join('\n');
+}
+
 function main(chart, options)
 {
+	chart = noPlagiarism(chart) // Unused because it does this for all charts
+	
+	// Loop for every quad hold found in the input chart
 	do {
 		noMoreStreams = true;
 		lines = chart.split('\n');	// List of strings, each one is a line
