@@ -219,6 +219,38 @@ function findFirstArrow(lines, i)
 	return 'R';	// Fallback
 }
 
+// Returns [",", ...arrows..., ","]
+// TODO: add firstMeasure and lastMeasure to StreamBlock!
+function getMeasure(lines, i)
+{
+	var measure = [], begin, end;
+
+	for (let j = i; j > 0; j--)  // Goes from i to the PREVIOUS ,
+	{
+		if (lines[j] == ",")
+		{
+			begin = j;
+			break;
+		}
+	}
+
+	for (let j = i; j < lines.length; j++)  // Goes from i to the NEXT ,
+	{
+		if (lines[j] == "," || lines[j] == ";")
+		{
+			end = j;
+			break;
+		}
+	}
+
+	for (let j = begin; j <= end; j++)
+	measure.push(lines[j]);
+	console.log("beign ", begin);
+	console.log("end", end);
+
+	return measure;
+}
+
 function findStreamBegin(lines, i)
 {
 	var skipMeasure = false, gap = 0;
@@ -322,7 +354,7 @@ function main(chart, options)
 				insideStream = true;
 			}
 
-			if (insideStream && i >= streamBegin)	// Additional check if first measure was skipped (otherwise it creates one more measures bc it saw the comma)
+			if (insideStream && i >= streamBegin)   // Additional check if first measure was skipped (otherwise it creates one more measures bc it saw the comma)
 			{
 				console.log("processing line", line);
 
