@@ -224,7 +224,7 @@ function getMeasure(lines, i)
 
 	for (let j = i; j > 0; j--)  // Goes from i to the PREVIOUS ,
 	{
-		if (lines[j] == ",")
+		if (lines[j] == "," || lines[j].slice(-1) == ":")
 		{
 			begin = j + 1;
 			break;
@@ -252,7 +252,7 @@ function findStreamBegin(lines, i)
 {
 	for (let j = i; j > 0; j--)	// Goes from 2222 to the PREVIOUS ,
 	{
-		if (lines[j] == ",")
+		if (lines[j] == "," || lines[j].slice(-1) == ":")
 		{
 			return j + 1;	// index of line after ,
 		}
