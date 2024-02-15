@@ -20,32 +20,15 @@ class StreamBlock {
 		var converted = this.convertMeasure(this.firstMeasure)
 		var startWriting = false;
 		
-		if (this.isEmpty(converted))
+		for (let i = 0; i < converted.length; i++)
 		{
-			console.log("first measure is empty");
+			if (converted[i] == "2222")
+				startWriting = true;
 			
-			for (let i = 0; i < converted.length; i++)
-			{
-				if (converted[i] == "2222")
-					startWriting = true;
-				
-				if (startWriting)
-					finalStream.push(this.arrows[count++]);
-				
-				else finalStream.push("0000");
-			}
-		}
-		
-		else	// Just adds the old measure
-		{
-			for (let i = 0; i < this.firstMeasure.length; i++)
-			{
-				if (this.firstMeasure[i] == "2222")
-					finalStream.push("0000");	// replace 3333 with 0
-				
-				else
-					finalStream.push(this.firstMeasure[i]);
-			}
+			if (startWriting)
+				finalStream.push(this.arrows[count++]);
+			
+			else finalStream.push(converted[i]);
 		}
 		
 		finalStream.push(",");
@@ -60,35 +43,20 @@ class StreamBlock {
 		var converted = this.convertMeasure(this.lastMeasure)
 		var stopWriting = false;
 		
-		if (this.isEmpty(converted))
+		for (let i = 0; i < converted.length; i++)
 		{
-			console.log("last measure is empty");
-			for (let i = 0; i < converted.length; i++)
+			if (converted[i] == "3333")
 			{
-				if (converted[i] == "3333")
-				{
-					finalStream.push(this.arrows[count++]);
-					stopWriting = true;
-				}
-				
-				else if (!stopWriting)
-					finalStream.push(this.arrows[count++]);
-				
-				else finalStream.push("0000");
+				finalStream.push(this.arrows[count++]);
+				stopWriting = true;
 			}
+			
+			else if (!stopWriting)
+				finalStream.push(this.arrows[count++]);
+			
+			else finalStream.push(converted[i]);
 		}
 		
-		else	// Just adds the old measure. TEMPORARYYYYYYY
-		{
-			for (let i = 0; i < this.lastMeasure.length; i++)
-			{
-				if (this.lastMeasure[i] == "3333")
-					finalStream.push("0000");	// replace 3333 with 0
-				
-				else
-					finalStream.push(this.lastMeasure[i]);
-			}
-		}
 		
 		finalStream.push(",");	// Could also be ;, TODO
 		
@@ -140,20 +108,6 @@ class StreamBlock {
 			lcm++;
 
 		return lcm;
-	}
-	
-	
-	isEmpty(measure)
-	{
-		for (let i = 0; i < measure.length; i++)
-		{
-			if (!["2222", "3333", "0000"].includes(measure[i]))
-			{
-				return false;
-			}
-		}
-		
-		return true;
 	}
 	
 	// TODO rename
