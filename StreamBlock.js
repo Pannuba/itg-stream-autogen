@@ -14,10 +14,10 @@ class StreamBlock {
 	}
 	
 	//TODO use same function for first and last measure
-	addFirstLastMeasure(measure, finalStream, count)
+	addFirstLastMeasure(measure, finalStream, count, isLastMeasure = false)
 	{
 		var converted = this.convertMeasure(measure)
-		var write = false;
+		var write = (isLastMeasure ? true : false);
 		
 		for (let i = 0; i < converted.length; i++)
 		{
@@ -27,6 +27,7 @@ class StreamBlock {
 			if (converted[i] == "3333")
 			{
 				finalStream.push(this.arrows[count++]);
+				i++;
 				write = false;
 			}
 			
@@ -121,7 +122,7 @@ class StreamBlock {
 				finalStream.push(',');
 			}
 			
-			[finalStream, count] = this.addFirstLastMeasure(this.lastMeasure, finalStream, count);
+			[finalStream, count] = this.addFirstLastMeasure(this.lastMeasure, finalStream, count, true);
 		}
 		
 		return finalStream;
