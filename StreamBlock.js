@@ -11,7 +11,6 @@ class StreamBlock {
 		this.lastMeasure = lastMeasure;
 		console.log("firstMeasure: ", firstMeasure);
 		console.log("lastMeasure: ", lastMeasure);
-		// if firstmeasure == lastMeasure, only add firstMeasure and skip everything else
 	}
 	
 	//TODO use same function for first and last measure
@@ -30,8 +29,6 @@ class StreamBlock {
 			
 			else finalStream.push(converted[i]);
 		}
-		
-		finalStream.push(",");
 		
 		// TODO check commas include/exclude, indexes etc
 		
@@ -109,6 +106,18 @@ class StreamBlock {
 		return lcm;
 	}
 	
+	// Returns true if the first measure contains 3333 (only one measure of generated stream)
+	isOneMeasure()
+	{
+		for (const arrow of this.firstMeasure)
+		{
+			if (arrow == "3333")
+				return true;
+		}
+		
+		return false;
+	}
+	
 	// TODO rename
 	addCommas()	// Puts the ',' every *quantization* arrows (e.g. , every 16 arrows)
 	{
@@ -118,18 +127,23 @@ class StreamBlock {
 		
 		[finalStream, count] = this.addFirstMeasure(finalStream, count);
 
-		for (let i = 0; i < this.measures - 2; i++)	// Even if there are excess arrows, it only gives the exact measures
+		if (!this.isOneMeasure())
 		{
-			for (let j = 0; j < this.quantization; j++)
+			finalStream.push(",");
+			
+			for (let i = 0; i < this.measures - 2; i++)	// Even if there are excess arrows, it only gives the exact measures
 			{
-				finalStream.push(this.arrows[count++])
-			}
+				for (let j = 0; j < this.quantization; j++)
+				{
+					finalStream.push(this.arrows[count++])
+				}
 
-			finalStream.push(',');
+				finalStream.push(',');
+			}
+			
+			[finalStream, count] = this.addLastMeasure(finalStream, count);
 		}
 		
-		[finalStream, count] = this.addLastMeasure(finalStream, count);
-
 		return finalStream;
 	}
 }
