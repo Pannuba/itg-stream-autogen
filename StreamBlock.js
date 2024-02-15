@@ -14,47 +14,27 @@ class StreamBlock {
 	}
 	
 	//TODO use same function for first and last measure
-	addFirstMeasure(finalStream, count)
+	addFirstLastMeasure(measure, finalStream, count)
 	{
-		var converted = this.convertMeasure(this.firstMeasure)
-		var startWriting = false;
+		var converted = this.convertMeasure(measure)
+		var write = false;
 		
 		for (let i = 0; i < converted.length; i++)
 		{
 			if (converted[i] == "2222" || converted[i] == "4444")
-				startWriting = true;
+				write = true;
 			
-			if (startWriting)
-				finalStream.push(this.arrows[count++]);
-			
-			else finalStream.push(converted[i]);
-		}
-		
-		// TODO check commas include/exclude, indexes etc
-		
-		return [finalStream, count];
-	}
-	
-	addLastMeasure(finalStream, count)
-	{
-		var converted = this.convertMeasure(this.lastMeasure)
-		var stopWriting = false;
-		
-		for (let i = 0; i < converted.length; i++)
-		{
 			if (converted[i] == "3333")
 			{
 				finalStream.push(this.arrows[count++]);
-				stopWriting = true;
+				write = false;
 			}
 			
-			else if (!stopWriting)
+			if (write)
 				finalStream.push(this.arrows[count++]);
 			
 			else finalStream.push(converted[i]);
 		}
-		
-		
 		
 		// TODO check commas include/exclude, indexes etc
 		
@@ -125,7 +105,7 @@ class StreamBlock {
 		var count = 0;
 		
 		
-		[finalStream, count] = this.addFirstMeasure(finalStream, count);
+		[finalStream, count] = this.addFirstLastMeasure(this.firstMeasure, finalStream, count);
 
 		if (!this.isOneMeasure())
 		{
@@ -141,7 +121,7 @@ class StreamBlock {
 				finalStream.push(',');
 			}
 			
-			[finalStream, count] = this.addLastMeasure(finalStream, count);
+			[finalStream, count] = this.addFirstLastMeasure(this.lastMeasure, finalStream, count);
 		}
 		
 		return finalStream;
