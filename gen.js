@@ -18,13 +18,10 @@ const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
 // Last N patterns (3 for now). Only used for non-candles
 var lastPatterns = ['X', 'X']	// Initialize with dummy values. Make part of StreamBlock?
 
-function generateStream(measures, options, firstArrow)
+function generateStream(stream, options)
 {
-
-	stream = new StreamBlock(measures, options["quantization"], firstArrow);
-
 	// Doesn't have to be precise, not a problem if it generates more than needed
-	arrowsToGenerate = measures * options["quantization"]; // TODO(?): move in StreamBlock class
+	arrowsToGenerate = stream.measures * options["quantization"]; // TODO(?): move in StreamBlock class
 
 	addPattern(true, stream);
 
@@ -148,7 +145,7 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 	var outputLines = [], streamLineCounter = 0, isStreamAdded = false;
 
 	inputLines.forEach((line, i) => {
-		if (i < streamBegin || i > (streamEnd - 1))	// We're before/after the generated stream
+		if (i < streamBegin || i > streamEnd)	// We're before/after the generated stream
 		{
 			outputLines.push(line)
 		}
@@ -219,7 +216,7 @@ function findFirstArrow(lines, i)
 	return 'R';	// Fallback
 }
 
-// Returns [",", ...arrows..., ","]
+// Returns [...arrows...] with no commas
 // TODO: add firstMeasure and lastMeasure to StreamBlock!
 function getMeasure(lines, i)
 {
@@ -229,7 +226,7 @@ function getMeasure(lines, i)
 	{
 		if (lines[j] == ",")
 		{
-			begin = j;
+			begin = j + 1;
 			break;
 		}
 	}
@@ -238,7 +235,7 @@ function getMeasure(lines, i)
 	{
 		if (lines[j] == "," || lines[j] == ";")
 		{
-			end = j;
+			end = j - 1;
 			break;
 		}
 	}
@@ -253,65 +250,24 @@ function getMeasure(lines, i)
 
 function findStreamBegin(lines, i)
 {
-	var skipMeasure = false, gap = 0;
-
-	for (let j = i - 1; j > 0; j--)	// goes back line by line from the 2222
+	for (let j = i; j > 0; j--)	// Goes from 2222 to the PREVIOUS ,
 	{
-		if (lines[j] == ",") break;
-
-		if (lines[j] != "0000")
+		if (lines[j] == ",")
 		{
-			console.log("skipping first measure");
-			skipMeasure = true;
-			break;
+			return j + 1;	// index of line after ,
 		}
 	}
-
-	if (skipMeasure)	// If there already are arrows in the measure where quad hold starts
-	{
-		lines[i] = "0000";	// Replace 2222 with empty space
-
-		for (let j = i; lines[j] != ','; j++)	// Calculates distance between 2222 and beginning of next measure
-			gap++;
-		
-		gap++;
-
-		streamBegin = i + gap;	// i is the old 2222's position
-	}
-
-	else	// If 2222 is at beginning of measure, or there are only 0000 between , and 2222
-	{
-		console.log("not skipping first measure");
-		lines[i] = "0000";
-
-		for (let j = i - 1; lines[j] != ','; --j)	// Calculates distance between 2222 and beginning of current measure
-			gap++;	// TODO: find this where i put comment "goes back line by line from 2222
-		
-		streamBegin = i - gap;	// gap must be 0 if 2222 is at beginning of measure!
-	}
-
-	return streamBegin;
 }
 
 function findStreamEnd(lines, i)
 {
-	streamEnd = i;
-	lines[i] = "0000";
-
-	var gap = 0;
-
-	for (let j = i - 1; j > 0; j--)	// Goes from 3333 to the PREVIOUS ,
+	for (let j = i; j < lines.length; j++)	// Goes from 3333 to the NEXT ,
 	{
-		if (lines[j] == ",")
+		if (lines[j] == "," || lines[j] == ";")
 		{
-			streamEnd -= gap;
-			break;
+			return j - 1;	// index of line before ,
 		}
-
-		gap++;
 	}
-
-	return streamEnd;
 }
 
 function noPlagiarism(chart)	// TODO: calculate breakdown???????
@@ -340,6 +296,8 @@ function main(chart, options)
 		lines = chart.split('\n');	// List of strings, each one is a line
 
 		var measures = 0, streamBegin = 0, streamEnd = 0, insideStream = false, firstArrow = '', quantization;
+		var firstMeasure, lastMeasure;
+		
 		for (let i = 0; i < lines.length; i++)
 		{
 			var line = lines[i];	// seta ultra
@@ -350,6 +308,7 @@ function main(chart, options)
 				streamBegin = findStreamBegin(lines, i);
 				firstArrow = findFirstArrow(lines, i);
 				console.log("firstARROW", firstArrow);
+				firstMeasure = getMeasure(lines, i);
 				noMoreStreams = false;			
 				insideStream = true;
 			}
@@ -362,8 +321,9 @@ function main(chart, options)
 
 				if (line == "3333")
 				{
-					streamEnd = findStreamEnd(lines, i, measures);
-
+					measures++;	// Counts the measure with the end of quad hold
+					streamEnd = findStreamEnd(lines, i);
+					lastMeasure = getMeasure(lines, i);
 					insideStream = false;
 					break;
 				}
@@ -375,7 +335,8 @@ function main(chart, options)
 		if (!noMoreStreams)
 		{
 			console.log(options)
-			stream = generateStream(measures, options, firstArrow)
+			stream = new StreamBlock(measures, options["quantization"], firstArrow, firstMeasure, lastMeasure);
+			generateStream(stream, options)
 			chart = getNewChart(stream, streamBegin, streamEnd, lines);
 		}
 	} while (!noMoreStreams) // faking
