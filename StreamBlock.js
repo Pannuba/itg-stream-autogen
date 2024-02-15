@@ -38,9 +38,13 @@ class StreamBlock {
 		
 		else	// Just adds the old measure
 		{
-			for (let i = 1; i < this.firstMeasure.length; i++)
+			for (let i = 0; i < this.firstMeasure.length; i++)
 			{
-				finalStream.push(this.firstMeasure[i]);
+				if (this.firstMeasure[i] == "2222")
+					finalStream.push("0000");	// replace 3333 with 0
+				
+				else
+					finalStream.push(this.firstMeasure[i]);
 			}
 		}
 		
@@ -74,11 +78,15 @@ class StreamBlock {
 			}
 		}
 		
-		else	// Just adds the old measure
+		else	// Just adds the old measure. TEMPORARYYYYYYY
 		{
-			for (let i = 1; i < this.lastMeasure.length; i++)
+			for (let i = 0; i < this.lastMeasure.length; i++)
 			{
-				finalStream.push(this.lastMeasure[i]);
+				if (this.lastMeasure[i] == "3333")
+					finalStream.push("0000");	// replace 3333 with 0
+				
+				else
+					finalStream.push(this.lastMeasure[i]);
 			}
 		}
 		
