@@ -22,7 +22,7 @@ class StreamBlock {
 		
 		for (let i = 0; i < converted.length; i++)
 		{
-			if (converted[i] == "2222")
+			if (converted[i] == "2222" || converted[i] == "4444")
 				startWriting = true;
 			
 			if (startWriting)
