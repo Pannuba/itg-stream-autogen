@@ -58,7 +58,6 @@ class StreamBlock {
 		}
 		
 		
-		finalStream.push(",");	// Could also be ;, TODO
 		
 		// TODO check commas include/exclude, indexes etc
 		
