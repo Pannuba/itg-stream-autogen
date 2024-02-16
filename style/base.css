@@ -102,12 +102,15 @@ img {
 /* Title */
 
 #title {
+	display: flex;
+	align-items: center;
 	margin-top: 0;
-	margin-bottom: min(4vh, 48px);
 }
 
-#title h1 {
-	text-align: center;
+#title img {
+	margin-bottom: 10px;
+	margin-right: max(1vw, 20px);
+	width: max(25%, 150px);
 }
 
 /* Form stuff */
