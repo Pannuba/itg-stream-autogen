@@ -169,7 +169,7 @@ function removeJacks(pattern)
 {
 	for (let i = 0; i < pattern.length; i++)
 	{
-		if (pattern[++i] == pattern[i])
+		if (pattern[i] == pattern[i+1])
 		{
 			pattern.splice(i, 1);
 			i--;
@@ -198,6 +198,10 @@ function findFirstArrow(lines, i)
 				{
 					patt.unshift(lines[k]);
 				}
+
+				/*else if (["0000", ","].includes(lines[k])
+				{
+				}*/
 
 				if (["1000", "0001"].includes(lines[k]))
 				{
