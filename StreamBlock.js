@@ -16,7 +16,8 @@ class StreamBlock {
 	//BUG if converted measure is not same quantization as stream to add, everything screws up
 	addFirstLastMeasure(measure, finalStream, count, isLastMeasure = false)
 	{
-		var converted = this.convertMeasure(measure)
+		var converted, jimmy;
+		[converted, jimmy] = this.convertMeasure(measure);	// Convert old measure to compatible quantization
 		var write = (isLastMeasure ? true : false), lock = false;
 		
 		for (let i = 0; i < converted.length; i++)
@@ -27,18 +28,31 @@ class StreamBlock {
 			if (converted[i] == "3333")
 			{
 				finalStream.push(this.arrows[count++]);
-				i++;
+				i++
+				
+				for (let j = 0; j < jimmy - 1; j++)		// Use jimmy because generated quantization could be different from converted quant
+				{
+					finalStream.push("0000");
+					i++;
+				}
+
 				write = false;
 				lock = true;	// can no longer write if there's another 2222/4444 after 3333 in the same measure
 			}
 			
 			if (write)
+			{
 				finalStream.push(this.arrows[count++]);
+
+				for (let j = 0; j < jimmy - 1; j++)
+				{
+					finalStream.push("0000");
+					i++;
+				}
+			}
 			
-			else finalStream.push(converted[i]);
+			else finalStream.push(converted[i]);	// No need to use jimmy because old measure is already converted
 		}
-		
-		// TODO check commas include/exclude, indexes etc
 		
 		return [finalStream, count];
 	}
@@ -54,7 +68,8 @@ class StreamBlock {
 		
 		var newQuant = this.findLCM(this.quantization, oldQuant);
 		
-		var jimmy = newQuant / oldQuant;
+		var jimmy = newQuant / this.quantization;
+		var jimmy2 = newQuant / oldQuant;
 		// TODO maybe jimmy = newquant / this.quant; so if i put 8ths in 16thsM its 2
 		// todo write stream in this function!!! deleteaddfirstlast
 		// If i put 8ths in 16ths measure,  jimmy is 16/16 = 1
@@ -64,19 +79,21 @@ class StreamBlock {
 		// Empty measure was 4ths, I want to put 8ths. newQuant is 8, jimmy is 2
 		
 		console.log("jimmy: ", jimmy);
+		console.log("oldQuant: ", oldQuant);
+		console.log("newQuant: ", newQuant);
 		
 		for (let i = 0; i < oldMeasure.length; i++)
 		{
 			newMeasure.push(oldMeasure[i])
 			
-			for (let j = 0; j < jimmy - 1; j++)	// - 1 because the first arrow is copied from the old measure
+			for (let j = 0; j < jimmy2 - 1; j++)	// - 1 because the first arrow is copied from the old measure
 			{
 				newMeasure.push("0000");
 			}
 		}
 		
 		console.log("converted measure: ", newMeasure);
-		return newMeasure;// Doesn't have commas
+		return [newMeasure, jimmy];// Doesn't have commas
 		
 	}
 	

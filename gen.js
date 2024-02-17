@@ -41,7 +41,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 	
 	if (isNotCandle)
 	{
-		console.log("adding no");
+		//console.log("adding no");
 		do {
 			pattern = chooseNextPattern((stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
 		} while (lastPatterns.includes(pattern))
@@ -64,7 +64,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 		{
 			if (Math.floor(Math.random() * 4) && !options['wtfMode'])	// 3/4ths of the time single candle. Skips for wtf mode
 			{
-				console.log("adding single candle");
+				//console.log("adding single candle");
 
 				do {
 					if (nextArrowLeftPatterns.includes(stream.lastPattern))
@@ -80,7 +80,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 			
 			else	// 1/4th of the time, double candle
 			{
-				console.log("adding double candle");
+				//console.log("adding double candle");
 				
 				do {
 					pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromLeftPatterns : startFromRightPatterns);
@@ -90,7 +90,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 		
 		else
 		{
-			console.log("adding double candle");
+			//console.log("adding double candle");
 			// TODO I WANT UP/DOWN ANCHORS!!!!!!!!!!!
 			do {
 				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);
@@ -103,7 +103,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 	lastPatterns.unshift(pattern);
 	lastPatterns.pop(); // Keep the list with the same amount of elements
 
-	console.log(pattern);
+	//onsole.log(pattern);
 
 	(pattern.slice(-1) == 'R') ? stream.nextArrow = 'L' : stream.nextArrow = 'R';
 
@@ -319,7 +319,7 @@ function main(chart, options)
 
 			if (insideStream && i >= streamBegin)   // Additional check if first measure was skipped (otherwise it creates one more measures bc it saw the comma)
 			{
-				console.log("processing line", line);
+				//console.log("processing line", line);
 
 				if (line == ",") measures++;
 
