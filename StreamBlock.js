@@ -13,15 +13,15 @@ class StreamBlock {
 		console.log("lastMeasure: ", lastMeasure);
 	}
 	
-	//TODO use same function for first and last measure
+	//BUG if converted measure is not same quantization as stream to add, everything screws up
 	addFirstLastMeasure(measure, finalStream, count, isLastMeasure = false)
 	{
 		var converted = this.convertMeasure(measure)
-		var write = (isLastMeasure ? true : false);
+		var write = (isLastMeasure ? true : false), lock = false;
 		
 		for (let i = 0; i < converted.length; i++)
 		{
-			if (converted[i] == "2222" || converted[i] == "4444")
+			if ((converted[i] == "2222" || converted[i] == "4444") && !lock)
 				write = true;
 			
 			if (converted[i] == "3333")
@@ -29,6 +29,7 @@ class StreamBlock {
 				finalStream.push(this.arrows[count++]);
 				i++;
 				write = false;
+				lock = true;	// can no longer write if there's another 2222/4444 after 3333 in the same measure
 			}
 			
 			if (write)
@@ -43,9 +44,9 @@ class StreamBlock {
 	}
 	
 	// Converts a measure of xths to something that can fit xths and (quantization)ths
-	// TODO: do this for existing arrows too (no if empty or not empty, ALWAYS!!!)
 	// 16ths and 24ths --> 48ths
 	// 16ths and 12ths --> 48ths
+	// TODO if 8ths and add 16ths ok, but if 16ths and add 8ths NOT OK
 	convertMeasure(oldMeasure)
 	{
 		var newMeasure = [];
@@ -54,6 +55,11 @@ class StreamBlock {
 		var newQuant = this.findLCM(this.quantization, oldQuant);
 		
 		var jimmy = newQuant / oldQuant;
+		// TODO maybe jimmy = newquant / this.quant; so if i put 8ths in 16thsM its 2
+		// todo write stream in this function!!! deleteaddfirstlast
+		// If i put 8ths in 16ths measure,  jimmy is 16/16 = 1
+		// if i put 16ths in 32nds measure, jimmy is 32/16 = 2
+		// if i put 16ths in 12ths measure, jimmy is 48/12 = 4
 		// Empty measure was 12ths, I want to put 16ths. newQuant is 48, jimmy is 4
 		// Empty measure was 4ths, I want to put 8ths. newQuant is 8, jimmy is 2
 		
