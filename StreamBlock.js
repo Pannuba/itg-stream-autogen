@@ -2,7 +2,7 @@ class StreamBlock {
 
 	constructor(measures, quantization, firstArrow, firstMeasure, lastMeasure)
 	{
-		this.measures = measures;	// ALL measures including first and last, which may be skipped
+		this.measures = measures;	// ALL measures including first and last, which may have existing arrows
 		this.quantization = quantization;
 		this.nextArrow = firstArrow;
 		this.arrows = [];
@@ -13,7 +13,7 @@ class StreamBlock {
 		console.log("lastMeasure: ", lastMeasure);
 	}
 	
-	//BUG if converted measure is not same quantization as stream to add, everything screws up
+
 	addFirstLastMeasure(measure, finalStream, count, isLastMeasure = false)
 	{
 		var converted, jimmy;
@@ -28,37 +28,34 @@ class StreamBlock {
 			if (converted[i] == "3333")
 			{
 				finalStream.push(this.arrows[count++]);
-				console.log("pushing ", this.arrows[count]);
-				i++
+				i++;
 				
 				for (let j = 0; j < jimmy - 1; j++)		// Use jimmy because generated quantization could be different from converted quant
 				{
-					console.log("pushing 0000");
 					finalStream.push("0000");
 					i++;
 				}
 
 				write = false;
 				lock = true;	// can no longer write if there's another 2222/4444 after 3333 in the same measure
-				// TODO: when it finds the 3333, write last arrow and the rest is simply the converted measure
-				console.log("i before break:", i);
 				break;
 			}
 			
 			if (write)
 			{
 				finalStream.push(this.arrows[count++]);
-				console.log("pushing ", this.arrows[count]);
 
 				for (let j = 0; j < jimmy - 1; j++)
 				{
-					console.log("pushing 0000");
 					finalStream.push("0000");
 					i++;
 				}
 			}
 
-			else {console.log("pushing ", converted[i]);finalStream.push(converted[i]);}	// No need to use jimmy because old measure is already converted
+			else {
+				console.log("pushing ", converted[i]);
+				finalStream.push(converted[i]);
+			}	// No need to use jimmy because old measure is already converted
 
 		}
 		console.log("i: ", i);
@@ -70,10 +67,8 @@ class StreamBlock {
 		
 		return [finalStream, count];
 	}
+
 	// Converts a measure of xths to something that can fit xths and (quantization)ths
-	// 16ths and 24ths --> 48ths
-	// 16ths and 12ths --> 48ths
-	// TODO if 8ths and add 16ths ok, but if 16ths and add 8ths NOT OK
 	convertMeasure(oldMeasure)
 	{
 		var newMeasure = [];
@@ -83,13 +78,6 @@ class StreamBlock {
 		
 		var jimmy = newQuant / this.quantization;
 		var jimmy2 = newQuant / oldQuant;
-		// TODO maybe jimmy = newquant / this.quant; so if i put 8ths in 16thsM its 2
-		// todo write stream in this function!!! deleteaddfirstlast
-		// If i put 8ths in 16ths measure,  jimmy is 16/16 = 1
-		// if i put 16ths in 32nds measure, jimmy is 32/16 = 2
-		// if i put 16ths in 12ths measure, jimmy is 48/12 = 4
-		// Empty measure was 12ths, I want to put 16ths. newQuant is 48, jimmy is 4
-		// Empty measure was 4ths, I want to put 8ths. newQuant is 8, jimmy is 2
 		
 		console.log("jimmy: ", jimmy);
 		console.log("oldQuant: ", oldQuant);
@@ -140,7 +128,6 @@ class StreamBlock {
 	{
 		var finalStream = [];
 		var count = 0;
-		
 		
 		[finalStream, count] = this.addFirstLastMeasure(this.firstMeasure, finalStream, count);
 

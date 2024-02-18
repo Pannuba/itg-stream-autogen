@@ -80,7 +80,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 			
 			else	// 1/4th of the time, double candle
 			{
-				//console.log("adding double candle");
+				////console.log("adding double candle");
 				
 				do {
 					pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromLeftPatterns : startFromRightPatterns);
@@ -153,7 +153,7 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 		else if (!isStreamAdded)	// Put the generated stream instead of the quad hold
 		{
 			stream.addCommas().forEach((line, j) => {
-				//console.log("adding generated", line)
+				////console.log("adding generated", line)
 				outputLines.push(line);
 			});
 			
@@ -199,10 +199,6 @@ function findFirstArrow(lines, i)
 					patt.unshift(lines[k]);
 				}
 
-				/*else if (["0000", ","].includes(lines[k])
-				{
-				}*/
-
 				if (["1000", "0001"].includes(lines[k]))
 				{
 					patt.unshift(lines[k]);
@@ -221,7 +217,6 @@ function findFirstArrow(lines, i)
 }
 
 // Returns [...arrows...] with no commas
-// TODO: add firstMeasure and lastMeasure to StreamBlock!
 function getMeasure(lines, i)
 {
 	var measure = [], begin, end;
@@ -246,8 +241,8 @@ function getMeasure(lines, i)
 
 	for (let j = begin; j <= end; j++)
 	measure.push(lines[j]);
-	console.log("beign ", begin);
-	console.log("end", end);
+	//console.log("beign ", begin);
+	//console.log("end", end);
 
 	return measure;
 }
@@ -311,7 +306,7 @@ function main(chart, options)
 				options["quantization"] = (line[0] == '2' ? options['quantHolds'] : options['quantRolls']);
 				streamBegin = findStreamBegin(lines, i);
 				firstArrow = findFirstArrow(lines, i);
-				console.log("firstARROW", firstArrow);
+				//console.log("firstARROW", firstArrow);
 				firstMeasure = getMeasure(lines, i);
 				noMoreStreams = false;			
 				insideStream = true;
@@ -319,7 +314,7 @@ function main(chart, options)
 
 			if (insideStream && i >= streamBegin)   // Additional check if first measure was skipped (otherwise it creates one more measures bc it saw the comma)
 			{
-				//console.log("processing line", line);
+				////console.log("processing line", line);
 
 				if (line == ",") measures++;
 
@@ -334,11 +329,11 @@ function main(chart, options)
 			}
 		}
 
-		console.log("start st: ", streamBegin, "\nend strm: ", streamEnd, "\nmeasures: ", measures)
+		//console.log("start st: ", streamBegin, "\nend strm: ", streamEnd, "\nmeasures: ", measures)
 
 		if (!noMoreStreams)
 		{
-			console.log(options)
+			//console.log(options)
 			stream = new StreamBlock(measures, options["quantization"], firstArrow, firstMeasure, lastMeasure);
 			generateStream(stream, options)
 			chart = getNewChart(stream, streamBegin, streamEnd, lines);
