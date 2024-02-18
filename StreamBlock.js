@@ -18,9 +18,9 @@ class StreamBlock {
 	{
 		var converted, jimmy;
 		[converted, jimmy] = this.convertMeasure(measure);	// Convert old measure to compatible quantization
-		var write = (isLastMeasure ? true : false), lock = false;
+		var write = (isLastMeasure ? true : false), lock = false, i;
 		
-		for (let i = 0; i < converted.length; i++)
+		for (i = 0; i < converted.length; i++)
 		{
 			if ((converted[i] == "2222" || converted[i] == "4444") && !lock)
 				write = true;
@@ -28,35 +28,48 @@ class StreamBlock {
 			if (converted[i] == "3333")
 			{
 				finalStream.push(this.arrows[count++]);
+				console.log("pushing ", this.arrows[count]);
 				i++
 				
 				for (let j = 0; j < jimmy - 1; j++)		// Use jimmy because generated quantization could be different from converted quant
 				{
+					console.log("pushing 0000");
 					finalStream.push("0000");
 					i++;
 				}
 
 				write = false;
 				lock = true;	// can no longer write if there's another 2222/4444 after 3333 in the same measure
+				// TODO: when it finds the 3333, write last arrow and the rest is simply the converted measure
+				console.log("i before break:", i);
+				break;
 			}
 			
 			if (write)
 			{
 				finalStream.push(this.arrows[count++]);
+				console.log("pushing ", this.arrows[count]);
 
 				for (let j = 0; j < jimmy - 1; j++)
 				{
+					console.log("pushing 0000");
 					finalStream.push("0000");
 					i++;
 				}
 			}
-			
-			else finalStream.push(converted[i]);	// No need to use jimmy because old measure is already converted
+
+			else {console.log("pushing ", converted[i]);finalStream.push(converted[i]);}	// No need to use jimmy because old measure is already converted
+
+		}
+		console.log("i: ", i);
+		for (let j = i; j < converted.length; j++)
+		{
+			console.log("pushing ", converted[j]);
+			finalStream.push(converted[j]);	// No need to use jimmy because old measure is already converted
 		}
 		
 		return [finalStream, count];
 	}
-	
 	// Converts a measure of xths to something that can fit xths and (quantization)ths
 	// 16ths and 24ths --> 48ths
 	// 16ths and 12ths --> 48ths
@@ -140,6 +153,7 @@ class StreamBlock {
 				for (let j = 0; j < this.quantization; j++)
 				{
 					finalStream.push(this.arrows[count++])
+					console.log("pushing ", this.arrows[count]);
 				}
 
 				finalStream.push(',');
