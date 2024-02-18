@@ -53,7 +53,6 @@ class StreamBlock {
 			}
 
 			else {
-				console.log("pushing ", converted[i]);
 				finalStream.push(converted[i]);
 			}	// No need to use jimmy because old measure is already converted
 
@@ -61,7 +60,6 @@ class StreamBlock {
 		console.log("i: ", i);
 		for (let j = i; j < converted.length; j++)
 		{
-			console.log("pushing ", converted[j]);
 			finalStream.push(converted[j]);	// No need to use jimmy because old measure is already converted
 		}
 		
@@ -140,7 +138,6 @@ class StreamBlock {
 				for (let j = 0; j < this.quantization; j++)
 				{
 					finalStream.push(this.arrows[count++])
-					console.log("pushing ", this.arrows[count]);
 				}
 
 				finalStream.push(',');

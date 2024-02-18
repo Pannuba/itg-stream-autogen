@@ -35,13 +35,13 @@ function generateStream(stream, options)
 	return stream;
 }
 
-function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to only pass options and not make the first pattern a candle (easy)
+function addPattern(isNotCandle = true, stream, options)
 {
 	var pattern = "";
 	
 	if (isNotCandle)
 	{
-		//console.log("adding no");
+		console.log("adding no");
 		do {
 			pattern = chooseNextPattern((stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
 		} while (lastPatterns.includes(pattern))
@@ -64,7 +64,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 		{
 			if (Math.floor(Math.random() * 4) && !options['wtfMode'])	// 3/4ths of the time single candle. Skips for wtf mode
 			{
-				//console.log("adding single candle");
+				console.log("adding single candle");
 
 				do {
 					if (nextArrowLeftPatterns.includes(stream.lastPattern))
@@ -80,7 +80,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 			
 			else	// 1/4th of the time, double candle
 			{
-				////console.log("adding double candle");
+				console.log("adding double candle");
 				
 				do {
 					pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromLeftPatterns : startFromRightPatterns);
@@ -90,7 +90,7 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 		
 		else
 		{
-			//console.log("adding double candle");
+			console.log("adding double candle");
 			// TODO I WANT UP/DOWN ANCHORS!!!!!!!!!!!
 			do {
 				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);
@@ -103,13 +103,19 @@ function addPattern(isNotCandle = true, stream, options)	// TODO: find a way to 
 	lastPatterns.unshift(pattern);
 	lastPatterns.pop(); // Keep the list with the same amount of elements
 
-	//onsole.log(pattern);
+	console.log(pattern);
 
 	(pattern.slice(-1) == 'R') ? stream.nextArrow = 'L' : stream.nextArrow = 'R';
 
 	convertPatternToList(pattern).forEach(arrow => {
 		stream.arrows.push(arrow);
 	});
+
+	if (!Math.floor(Math.random() * 8))	// Randomly add L/R after adding the pattern, creates non-candle L/R anchors
+	{
+		if (nextArrowLeftPatterns.includes(pattern)) {stream.arrows.push("1000"); stream.nextArrow = 'R';}
+		else {stream.arrows.push("0001"); stream.nextArrow = 'L';}
+	}
 	
 	return stream;
 }
