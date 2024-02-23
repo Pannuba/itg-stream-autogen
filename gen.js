@@ -1,11 +1,22 @@
-// Patterns that start with a foot, and the next one starts with the left arrow
-const nextArrowLeftPatterns = ['LDUR', 'LUDR', 'RUDUR', 'RDUDR', 'RUR', 'RDR', 'RDULUDR', 'RUDLDUR']
-// Patterns that start with a foot, and the next one starts with the right arrow
-const nextArrowRightPatterns = ['RUDL', 'RDUL', 'LDUDL', 'LUDUL', 'LUL', 'LDL', 'LDURUDL', 'LUDRDUL']
 // Patterns that start with left
 const startFromLeftPatterns = {'LDUR' : 25, 'LUDR' : 25, 'LDUDL' : 6, 'LUDUL' : 6, 'LUL' : 17, 'LDL' : 17, 'LDURUDL' : 2, 'LUDRDUL' : 2}
 // Yeah
 const startFromRightPatterns = {'RUDL' : 25, 'RDUL' : 25, 'RUDUR' : 6, 'RDUDR' : 6, 'RUR' : 17, 'RDR' : 17, 'RDULUDR': 2, 'RUDLDUR' : 2}
+const rightFacingPatterns = ['LDUR', 'LDL', 'RUR', 'RUDL', 'LDUDL', 'RUDUR', 'LDURUDL', 'RUDLDUR']
+const leftFacingPatterns = ['RDUL', 'RDR', 'LUL', 'LUDR', 'RDUDR', 'LUDUL', 'RDULUDR', 'LUDRDUL']
+
+/*
+	For algorithmic U/D anchors:
+	* if pattern length is 5 (dorito)
+	* add stair missing first arrow that has opposite nextArrow and belongs to same R/LfacingPatterns list of the dorito
+
+	Can also di algorithmic triangoloni:
+	* if last pattern is length 4, add pattern facing same direction that starts with opposite nextArrow
+	This fixes double stair problem and makes dicts less ugly
+
+*/
+
+
 // Candle down with left or right foot
 const candleDownDict = {'D' : 10, 'DU' : 80, 'DUD' : 10 }
 // Candle up with left or right foot
@@ -42,6 +53,22 @@ function addPattern(isNotCandle = true, stream, options)
 	if (isNotCandle)
 	{
 		console.log("adding no");
+
+		if (!Math.floor(Math.random() * 8))	// Randomly add L/R before adding the pattern, creates non-candle L/R anchors
+		{
+			if (stream.nextArrow == 'L')
+			{
+				stream.arrows.push("1000");
+				stream.nextArrow = 'R';
+			}
+	
+			else
+			{
+				stream.arrows.push("0001");
+				stream.nextArrow = 'L';
+			}
+		}
+		
 		do {
 			pattern = chooseNextPattern((stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
 		} while (lastPatterns.includes(pattern))
@@ -67,7 +94,7 @@ function addPattern(isNotCandle = true, stream, options)
 				console.log("adding single candle");
 
 				do {
-					if (nextArrowLeftPatterns.includes(stream.lastPattern))
+					if (stream.nextArrow == 'L')
 						pattern = chooseNextPattern(startFromRightPatterns);
 					
 					else
@@ -75,7 +102,7 @@ function addPattern(isNotCandle = true, stream, options)
 
 				} while ((pattern[1] + pattern[2] == candlePattern) && (pattern.length == 4 || pattern.length == 7)) // Prevents double stairs. Add option to allow them?
 				// Actually double stairs still happen if I have LDUR and LDURUDL in a row, noncandle. TODO add condition
-				stream.arrows.push(nextArrowLeftPatterns.includes(stream.lastPattern) ? "1000" : "0001");	// Ok because pattern is added later anyway
+				stream.arrows.push(stream.nextArrow == 'L' ? "1000" : "0001");	// Ok because pattern is added later anyway
 			}
 			
 			else	// 1/4th of the time, double candle
@@ -83,7 +110,7 @@ function addPattern(isNotCandle = true, stream, options)
 				console.log("adding double candle");
 				
 				do {
-					pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromLeftPatterns : startFromRightPatterns);
+					pattern = chooseNextPattern(stream.nextArrow == 'L' ? startFromLeftPatterns : startFromRightPatterns);
 				} while (pattern[1] == candlePattern[1]);	// TODO(?) remove this condition? makes some boxes show up. Maybe add option
 			}
 		}
@@ -93,7 +120,7 @@ function addPattern(isNotCandle = true, stream, options)
 			console.log("adding double candle");
 			// TODO I WANT UP/DOWN ANCHORS!!!!!!!!!!!
 			do {
-				pattern = chooseNextPattern(nextArrowLeftPatterns.includes(stream.lastPattern) ? startFromRightPatterns : startFromLeftPatterns);
+				pattern = chooseNextPattern(stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
 			} while (pattern[1] == candlePattern.slice(-1));
 		}
 	}
@@ -110,12 +137,6 @@ function addPattern(isNotCandle = true, stream, options)
 	convertPatternToList(pattern).forEach(arrow => {
 		stream.arrows.push(arrow);
 	});
-
-	if (!Math.floor(Math.random() * 8))	// Randomly add L/R after adding the pattern, creates non-candle L/R anchors
-	{
-		if (nextArrowLeftPatterns.includes(pattern)) {stream.arrows.push("1000"); stream.nextArrow = 'R';}
-		else {stream.arrows.push("0001"); stream.nextArrow = 'L';}
-	}
 	
 	return stream;
 }
