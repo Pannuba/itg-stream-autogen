@@ -29,108 +29,116 @@ function generateStream(stream, options)
 	// Doesn't have to be precise, not a problem if it generates more than needed
 	arrowsToGenerate = stream.measures * options["quantization"]; // TODO(?): move in StreamBlock class
 
-	addPattern(true, stream);
+	addNonCandle(stream);
 
 	while (arrowsToGenerate > 0)
 	{
 		// TODO: implement random thing like tetris where after every n ALWAYS pick candle
-		stream = addPattern(Math.floor(Math.random() * options["candleDens"]), stream, options);	// if 0 candle, if > 0 no
+		if (Math.floor(Math.random() * options["candleDens"]))	// if 0 candle, if > 0 no
+			stream = addNonCandle(stream, options);
+		
+		else
+			stream = addCandle(stream, options);
+
 		arrowsToGenerate -= stream.lastPatterns[0].length;
 	}
 
 	return stream;
 }
 
-function addPattern(isNotCandle = true, stream, options)
+function addNonCandle(stream, options)
 {
 	var pattern = "";
 	
-	if (isNotCandle)
+	console.log("adding no");
+
+	if (!Math.floor(Math.random() * 10))	// Randomly add L/R before adding the pattern, creates non-candle L/R anchors
 	{
-		console.log("adding no");
-
-		if (!Math.floor(Math.random() * 10))	// Randomly add L/R before adding the pattern, creates non-candle L/R anchors
+		if (stream.nextArrow == 'L')
 		{
-			if (stream.nextArrow == 'L')
-			{
-				stream.arrows.push("1000");
-				stream.nextArrow = 'R';
-			}
-	
-			else
-			{
-				stream.arrows.push("0001");
-				stream.nextArrow = 'L';
-			}
+			stream.arrows.push("1000");
+			stream.nextArrow = 'R';
 		}
-		
-		do {
-			pattern = chooseNextPattern((stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
-		} while (stream.lastPatterns.includes(pattern))
 
-		if (pattern.length == 4 && !Math.floor(Math.random() * 12))	// If stair, make big triangle . push stair now into stream, remove last arrow, pattern becomes the other stair
-		{
-			processPattern(pattern, stream);
-			
-			stream.arrows.pop(); // Remove stair's last arrow
-			var stairDirection = rightFacingPatterns.includes(pattern) ? 'R' : 'L';
-
-			// add stair facing same direction but starting from opposite arrow. Pattern is added at the end of function, very ugly, make sth like pushPattern()
-
-			do {// TODO put this do/while check in chooseNextPattern, pass condition in while?? YES PERFECT
-				pattern = chooseNextPattern((stream.nextArrow == 'R') ? startFromLeftPatterns : startFromRightPatterns)	
-			} while (pattern.length != 4 || stairDirection != (rightFacingPatterns.includes(pattern) ? 'R' : 'L'))
-		}
-	}
-
-	else	// isNotCandle is not zero. TODO(?) balance candles more (aka after x patterns if still no candle add one
-	{
-		var secondToLastArrow = stream.lastPatterns[0].slice(-2, -1), candlePattern;
-
-		(secondToLastArrow == 'U') ? candlePattern = chooseNextPattern(candleDownDict) : candlePattern = chooseNextPattern(candleUpDict);
-
-		convertPatternToList(candlePattern).forEach(arrow => {
-			stream.arrows.push(arrow);
-		});
-
-		// Gets stuck if I put the lastPatterns check. Fixed by reducing lastPatterns to 2 from 3.
-
-		if (candlePattern.length == 2)
-		{
-			if (Math.floor(Math.random() * 4) && !options['wtfMode'])	// 3/4ths of the time single candle. Skips for wtf mode
-			{
-				console.log("adding single candle");
-
-				do {
-					if (stream.nextArrow == 'L')
-						pattern = chooseNextPattern(startFromRightPatterns);
-					
-					else
-						pattern = chooseNextPattern(startFromLeftPatterns);
-
-				} while ((pattern[1] + pattern[2] == candlePattern) && (pattern.length == 4 || pattern.length == 7)) // Prevents double stairs. Add option to allow them?
-				// Actually double stairs still happen if I have LDUR and LDURUDL in a row, noncandle. TODO add condition
-				stream.arrows.push(stream.nextArrow == 'L' ? "1000" : "0001");	// Ok because pattern is added later anyway
-			}
-			
-			else	// 1/4th of the time, double candle
-			{
-				console.log("adding double candle");
-				
-				do {
-					pattern = chooseNextPattern(stream.nextArrow == 'L' ? startFromLeftPatterns : startFromRightPatterns);
-				} while (pattern[1] == candlePattern[1]);	// TODO(?) remove this condition? makes some boxes show up. Maybe add option
-			}
-		}
-		
 		else
 		{
-			console.log("adding double candle");
-			// TODO I WANT UP/DOWN ANCHORS!!!!!!!!!!!
-			do {
-				pattern = chooseNextPattern(stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
-			} while (pattern[1] == candlePattern.slice(-1));
+			stream.arrows.push("0001");
+			stream.nextArrow = 'L';
 		}
+	}
+	
+	do {
+		pattern = chooseNextPattern((stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
+	} while (stream.lastPatterns.includes(pattern))
+
+	if (pattern.length == 4 && !Math.floor(Math.random() * 12))	// If stair, make big triangle . push stair now into stream, remove last arrow, pattern becomes the other stair
+	{
+		processPattern(pattern, stream);
+		
+		stream.arrows.pop(); // Remove stair's last arrow
+		var stairDirection = rightFacingPatterns.includes(pattern) ? 'R' : 'L';
+
+		// add stair facing same direction but starting from opposite arrow. Pattern is added at the end of function, very ugly, make sth like pushPattern()
+
+		do {// TODO put this do/while check in chooseNextPattern, pass condition in while?? YES PERFECT
+			pattern = chooseNextPattern((stream.nextArrow == 'R') ? startFromLeftPatterns : startFromRightPatterns)	
+		} while (pattern.length != 4 || stairDirection != (rightFacingPatterns.includes(pattern) ? 'R' : 'L'))
+	}
+
+	processPattern(pattern, stream);
+	
+	return stream;
+}
+
+function addCandle(stream, options)
+{
+	var pattern = "";
+	
+	var secondToLastArrow = stream.lastPatterns[0].slice(-2, -1), candlePattern;
+
+	(secondToLastArrow == 'U') ? candlePattern = chooseNextPattern(candleDownDict) : candlePattern = chooseNextPattern(candleUpDict);
+
+	convertPatternToList(candlePattern).forEach(arrow => {
+		stream.arrows.push(arrow);
+	});
+
+	// Gets stuck if I put the lastPatterns check. Fixed by reducing lastPatterns to 2 from 3.
+
+	if (candlePattern.length == 2)
+	{
+		if (Math.floor(Math.random() * 4) && !options['wtfMode'])	// 3/4ths of the time single candle. Skips for wtf mode
+		{
+			console.log("adding single candle");
+
+			do {
+				if (stream.nextArrow == 'L')
+					pattern = chooseNextPattern(startFromRightPatterns);
+				
+				else
+					pattern = chooseNextPattern(startFromLeftPatterns);
+
+			} while ((pattern[1] + pattern[2] == candlePattern) && (pattern.length == 4 || pattern.length == 7)) // Prevents double stairs. Add option to allow them?
+			// Actually double stairs still happen if I have LDUR and LDURUDL in a row, noncandle. TODO add condition
+			stream.arrows.push(stream.nextArrow == 'L' ? "1000" : "0001");	// Ok because pattern is added later anyway
+		}
+		
+		else	// 1/4th of the time, double candle
+		{
+			console.log("adding double candle");
+			
+			do {
+				pattern = chooseNextPattern(stream.nextArrow == 'L' ? startFromLeftPatterns : startFromRightPatterns);
+			} while (pattern[1] == candlePattern[1]);	// TODO(?) remove this condition? makes some boxes show up. Maybe add option
+		}
+	}
+	
+	else
+	{
+		console.log("adding double candle");
+		// TODO I WANT UP/DOWN ANCHORS!!!!!!!!!!!
+		do {
+			pattern = chooseNextPattern(stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
+		} while (pattern[1] == candlePattern.slice(-1));
 	}
 
 	processPattern(pattern, stream);
@@ -163,6 +171,8 @@ function chooseNextPattern(patternDict)
 
 		num -= weight;
 	}
+
+	return null;
 }
 
 // Converts "LUDL" to ["1000", "0100", "0010", "0001"]
