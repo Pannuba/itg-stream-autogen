@@ -99,9 +99,7 @@ function getMeasure(lines, i)
 	}
 
 	for (let j = begin; j <= end; j++)
-	measure.push(lines[j]);
-	//console.log("beign ", begin);
-	//console.log("end", end);
+		measure.push(lines[j]);
 
 	return measure;
 }
@@ -153,7 +151,7 @@ function main(chart, options)
 		noMoreStreams = true;
 		lines = chart.split('\n');	// List of strings, each one is a line
 
-		var measures = 0, streamBegin = 0, streamEnd = 0, insideStream = false, firstArrow = '', quantization;
+		var measures = 0, streamBegin = 0, streamEnd = 0, insideStream = false, firstArrow = '';
 		var firstMeasure, lastMeasure;
 		
 		for (let i = 0; i < lines.length; i++)

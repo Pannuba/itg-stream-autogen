@@ -1,20 +1,12 @@
-// Patterns that start with left
-const startFromLeftPatterns = {'LDUR' : 25, 'LUDR' : 25, 'LDUDL' : 6, 'LUDUL' : 6, 'LUL' : 19, 'LDL' : 19}
-// Yeah
+const startFromLeftPatterns  = {'LDUR' : 25, 'LUDR' : 25, 'LDUDL' : 6, 'LUDUL' : 6, 'LUL' : 19, 'LDL' : 19}
 const startFromRightPatterns = {'RUDL' : 25, 'RDUL' : 25, 'RUDUR' : 6, 'RDUDR' : 6, 'RUR' : 19, 'RDR' : 19}
-
 const rightFacingPatterns = ['LDUR', 'LDL', 'RUR', 'RUDL', 'LDUDL', 'RUDUR']
-
-const leftFacingPatterns = ['RDUL', 'RDR', 'LUL', 'LUDR', 'RDUDR', 'LUDUL']
-// Candle down with left or right foot
+const leftFacingPatterns  = ['RDUL', 'RDR', 'LUL', 'LUDR', 'RDUDR', 'LUDUL']
 const candleDownDict = {'D' : 10, 'DU' : 80, 'DUD' : 10 }
-// Candle up with left or right foot
-const candleUpDict = {'U' : 10, 'UD' : 80, 'UDU' : 10 }
-
+const candleUpDict   = {'U' : 10, 'UD' : 80, 'UDU' : 10 }
+const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
 //tot% double candle = 10 + 80/4 + 10 = 10 + 20 + 10 = 40% (was 40 + 40/3 + 20 = 73.3%)
 //tot% single candle = (80*3)/4 = 60% (was 40*2/3 = 26.6%)
-
-const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
 
 
 class Generator {
@@ -30,7 +22,7 @@ class Generator {
 		// Doesn't have to be precise, not a problem if it generates more than needed
 		var arrowsToGenerate = this.stream.measures * this.options["quantization"]; // TODO(?): move in StreamBlock class
 
-		this.addNonCandle();
+		this.addNonCandle();	// First pattern can't be a candle
 
 		while (arrowsToGenerate > 0)
 		{
@@ -112,13 +104,8 @@ class Generator {
 				console.log("adding single candle");
 
 				do {
-					if (this.stream.nextArrow == 'L')
-						pattern = this.chooseNextPattern(startFromRightPatterns);
-					
-					else
-						pattern = this.chooseNextPattern(startFromLeftPatterns);
-
-				} while ((pattern[1] + pattern[2] == candlePattern) && (pattern.length == 4 || pattern.length == 7)) // Prevents double stairs. Add option to allow them?
+						pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
+				} while ((pattern[1] + pattern[2] == candlePattern) && pattern.length == 4) // Prevents double stairs. Add option to allow them?
 				// Actually double stairs still happen if I have LDUR and LDURUDL in a row, noncandle. TODO add condition
 				this.stream.arrows.push(this.stream.nextArrow == 'L' ? "1000" : "0001");	// Ok because pattern is added later anyway
 			}

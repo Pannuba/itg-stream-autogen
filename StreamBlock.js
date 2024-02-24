@@ -9,8 +9,6 @@ class StreamBlock {
 		this.lastPatterns = ['X', 'X'];	// Last 2 patterns, initialized with dummy values. [0] is the very last
 		this.firstMeasure = firstMeasure;
 		this.lastMeasure = lastMeasure;
-		//console.log("firstMeasure: ", firstMeasure);
-		//console.log("lastMeasure: ", lastMeasure);
 	}
 	
 	addFirstLastMeasure(measure, finalStream, count, isLastMeasure = false)
@@ -76,7 +74,6 @@ class StreamBlock {
 		var jimmy = newQuant / this.quantization;
 		var jimmy2 = newQuant / oldQuant;
 		
-		console.log("jimmy: ", jimmy);
 		console.log("oldQuant: ", oldQuant);
 		console.log("newQuant: ", newQuant);
 		
