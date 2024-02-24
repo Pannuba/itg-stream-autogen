@@ -145,7 +145,7 @@ class Generator {
 				do {
 					pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
 				} while ((candlePattern.length == 3 && pattern[1] == candlePattern[2]) ||	// pattern[1] check prevents ugly ass patterns which may actually be ok for O.A.S. add option?
-				         (candlePattern.length == 1 && pattern.length == 3 && pattern[1] == candlePattern));
+				         (candlePattern.length == 1 && (pattern.length == 3 || pattern[1] == candlePattern)));
 			}
 			
 			else	// 1/anchDens times, U/D anchor. Does NOT skip for wtf mode because anchors funni
@@ -153,9 +153,9 @@ class Generator {
 				console.log("adding candle anchor (double or single)");
 				
 				do {
-					pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromLeftPatterns : startFromRightPatterns);
-				} while ((candlePattern.length == 3 && pattern[1] != candlePattern[2] && pattern.length != 4) ||	// If UDU/DUD candle, I want a stair that makes an U/D anchor
-				         (candlePattern.length == 1 && pattern.length != 3 && pattern[1] == candlePattern));	// If U/D candle, I want a L/R anchor double candle. 3rd check removes towers. Option?
+					pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
+				} while ((candlePattern.length == 3 && (pattern[1] != candlePattern[2] || pattern.length != 4)) ||	// If UDU/DUD candle, I want a stair that makes an U/D anchor
+				         (candlePattern.length == 1 && (pattern.length != 3 || pattern[1] == candlePattern))    );	// If U/D candle, I want a L/R anchor double candle. 3rd check removes towers. Option?
 			}
 		}
 
