@@ -12,7 +12,7 @@ function getNewChart(stream, streamBegin, streamEnd, inputLines)
 		else if (!isStreamAdded)	// Put the generated stream instead of the quad hold
 		{
 			stream.addCommas().forEach((line, j) => {
-				////console.log("adding generated", line)
+				//console.log("adding generated", line)
 				outputLines.push(line);
 			});
 			
@@ -163,7 +163,7 @@ function main(chart, options)
 				options["quantization"] = (line[0] == '2' ? options['quantHolds'] : options['quantRolls']);
 				streamBegin = findStreamBegin(lines, i);
 				firstArrow = findFirstArrow(lines, i);
-				//console.log("firstARROW", firstArrow);
+				console.log("firstARROW", firstArrow);
 				firstMeasure = getMeasure(lines, i);
 				noMoreStreams = false;			
 				insideStream = true;
@@ -171,7 +171,7 @@ function main(chart, options)
 
 			if (insideStream && i >= streamBegin)   // Additional check if first measure was skipped (otherwise it creates one more measures bc it saw the comma)
 			{
-				////console.log("processing line", line);
+				//console.log("processing line", line);
 
 				if (line == ",") measures++;
 
@@ -186,11 +186,11 @@ function main(chart, options)
 			}
 		}
 
-		//console.log("start st: ", streamBegin, "\nend strm: ", streamEnd, "\nmeasures: ", measures)
+		console.log("start st: ", streamBegin, "\nend strm: ", streamEnd, "\nmeasures: ", measures)
 
 		if (!noMoreStreams)
 		{
-			//console.log(options)
+			console.log(options)
 			stream = new StreamBlock(measures, options["quantization"], firstArrow, firstMeasure, lastMeasure);
 			gen = new Generator(stream, options);	// Create one Generator only once? TODO
 			gen.generateStream() // stream = ..?
