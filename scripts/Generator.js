@@ -27,7 +27,7 @@ class Generator {
 		while (arrowsToGenerate > 0)
 		{
 			// TODO: implement random thing like tetris where after every n ALWAYS pick candle
-			if (Math.floor(Math.random() * this.options["candleDens"]))	// if 0 candle, if > 0 no
+			if (Math.floor(Math.random() * this.options["candleDens"]))	// if 0 candle, if != 0 no
 				this.addNonCandle();
 			
 			else
@@ -109,7 +109,7 @@ class Generator {
 
 		// Gets stuck if I put the lastPatterns check. Fixed by reducing lastPatterns to 2 from 3.
 
-		if (candlePattern.length == 2)
+		if (candlePattern.length == 2)	// 80% of the time
 		{
 			if (Math.floor(Math.random() * 4) && !this.options['wtfMode'])	// 3/4ths of the time single candle. Skips for wtf mode
 			{
@@ -118,11 +118,11 @@ class Generator {
 				do {
 						pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
 				} while ((pattern[1] + pattern[2] == candlePattern) && pattern.length == 4) // Prevents double stairs. Add option to allow them?
-				// Actually double stairs still happen if I have LDUR and LDURUDL in a row, noncandle. TODO add condition
+
 				this.stream.arrows.push(this.stream.nextArrow == 'L' ? "1000" : "0001");	// Ok because pattern is added later anyway
 			}
 			
-			else	// 1/4th of the time, double candle
+			else	// 1/4th of DU/UD candles are double
 			{
 				console.log("adding double candle");
 				
@@ -132,13 +132,31 @@ class Generator {
 			}
 		}
 		
-		else
+		else	// 20% of the time (10% U/D, 10% UDU/DUD)
 		{
-			console.log("adding double candle");
+			/*
+			TODO MERGE ANCHOR IF LENGTH IS 1 OR 3, ADD ANOTHER CHECK IN THE FIRST IF (WHEN I WANT ANCHROS)
+			*/
+
+			if (Math.floor(Math.random() * this.options["anchorDens"]))	// 1 - 1/anchDens times it's a double candle
+			{
+				console.log("adding double candle");
+
+				do {
+					pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
+				} while ((candlePattern.length == 3 && pattern[1] == candlePattern[2]) ||	// pattern[1] check prevents ugly ass patterns which may actually be ok for O.A.S. add option?
+				         (candlePattern.length == 1 && pattern.length == 3 && pattern[1] == candlePattern));
+			}
 			
-			do {
-				pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
-			} while (pattern[1] == candlePattern.slice(-1));
+			else	// 1/anchDens times, U/D anchor. Does NOT skip for wtf mode because anchors funni
+			{
+				console.log("adding candle anchor (double or single)");
+				
+				do {
+					pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromLeftPatterns : startFromRightPatterns);
+				} while ((candlePattern.length == 3 && pattern[1] != candlePattern[2] && pattern.length != 4) ||	// If UDU/DUD candle, I want a stair that makes an U/D anchor
+				         (candlePattern.length == 1 && pattern.length != 3 && pattern[1] == candlePattern));	// If U/D candle, I want a L/R anchor double candle. 3rd check removes towers. Option?
+			}
 		}
 
 		this.processPattern(pattern, stream);
