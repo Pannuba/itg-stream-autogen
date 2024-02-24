@@ -45,7 +45,7 @@ class Generator {
 		
 		console.log("adding no");
 
-		if (!Math.floor(Math.random() * 10))	// Randomly add L/R before adding the pattern, creates non-candle L/R anchors
+		if (!Math.floor(Math.random() * this.options["anchorDens"]))	// Randomly add L/R before adding the pattern, creates non-candle L/R anchors
 		{
 			if (this.stream.nextArrow == 'L')
 			{
@@ -63,14 +63,8 @@ class Generator {
 		do {
 			pattern = this.chooseNextPattern((this.stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
 		} while (this.stream.lastPatterns.includes(pattern))
-		/*
-			For algorithmic U/D anchors:
-			* if pattern length is 5 (dorito)
-			* add stair missing first arrow that has opposite nextArrow and belongs to same R/LfacingPatterns list of the dorito
-			When this is done, add anchor density option in form and check when adding random L/R or U/D anchors
-		*/
 
-		if (pattern.length == 5 && !Math.floor(Math.random() * 12))
+		if (pattern.length == 5 && !Math.floor(Math.random() * this.options["anchorDens"]))
 		{
 			this.processPattern(pattern, stream);
 			
@@ -141,7 +135,7 @@ class Generator {
 		else
 		{
 			console.log("adding double candle");
-			// TODO I WANT UP/DOWN ANCHORS!!!!!!!!!!!
+			
 			do {
 				pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
 			} while (pattern[1] == candlePattern.slice(-1));

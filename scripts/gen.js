@@ -217,6 +217,7 @@ function seParti()
 	var customQuantHolds = document.getElementById("customquant-holds").value;
 	var customQuantRolls = document.getElementById("customquant-rolls").value;
 	var candleDens = document.getElementById("candles").value;
+	var anchorDens = document.getElementById("anchors").value;
 	var wtfMode = (candleDens == 0) ? true : false;
 
 	if (customQuantHolds && customQuantHolds != 0) quantHolds = customQuantHolds;
@@ -226,6 +227,7 @@ function seParti()
 		'quantHolds' : quantHolds,
 		'quantRolls' : quantRolls,
 		'candleDens' : candleDens,		// TODO: add candleDens for rolls
+		'anchorDens' : anchorDens,
 		'wtfMode' : wtfMode
 	};
 
