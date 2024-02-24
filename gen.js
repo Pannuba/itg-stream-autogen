@@ -1,19 +1,15 @@
 // Patterns that start with left
-const startFromLeftPatterns = {'LDUR' : 25, 'LUDR' : 25, 'LDUDL' : 6, 'LUDUL' : 6, 'LUL' : 17, 'LDL' : 17, 'LDURUDL' : 2, 'LUDRDUL' : 2}
+const startFromLeftPatterns = {'LDUR' : 25, 'LUDR' : 25, 'LDUDL' : 7, 'LUDUL' : 7, 'LUL' : 18, 'LDL' : 18}
 // Yeah
-const startFromRightPatterns = {'RUDL' : 25, 'RDUL' : 25, 'RUDUR' : 6, 'RDUDR' : 6, 'RUR' : 17, 'RDR' : 17, 'RDULUDR': 2, 'RUDLDUR' : 2}
-const rightFacingPatterns = ['LDUR', 'LDL', 'RUR', 'RUDL', 'LDUDL', 'RUDUR', 'LDURUDL', 'RUDLDUR']
-const leftFacingPatterns = ['RDUL', 'RDR', 'LUL', 'LUDR', 'RDUDR', 'LUDUL', 'RDULUDR', 'LUDRDUL']
+const startFromRightPatterns = {'RUDL' : 25, 'RDUL' : 25, 'RUDUR' : 7, 'RDUDR' : 7, 'RUR' : 18, 'RDR' : 18}
+const rightFacingPatterns = ['LDUR', 'LDL', 'RUR', 'RUDL', 'LDUDL', 'RUDUR']
+const leftFacingPatterns = ['RDUL', 'RDR', 'LUL', 'LUDR', 'RDUDR', 'LUDUL']
 
 /*
 	For algorithmic U/D anchors:
 	* if pattern length is 5 (dorito)
 	* add stair missing first arrow that has opposite nextArrow and belongs to same R/LfacingPatterns list of the dorito
-
-	Can also di algorithmic triangoloni:
-	* if last pattern is length 4, add pattern facing same direction that starts with opposite nextArrow
-	This fixes double stair problem and makes dicts less ugly
-
+	When this is done, add anchor density option in form and check when adding random L/R or U/D anchors
 */
 
 
@@ -27,7 +23,7 @@ const candleUpDict = {'U' : 10, 'UD' : 80, 'UDU' : 10 }
 
 const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
 // Last N patterns (3 for now). Only used for non-candles
-var lastPatterns = ['X', 'X']	// Initialize with dummy values. Make part of StreamBlock?
+var lastPatterns = ['X', 'X']	// Initialize with dummy values. Make part of StreamBlock? Yes
 
 function generateStream(stream, options)
 {
@@ -54,7 +50,7 @@ function addPattern(isNotCandle = true, stream, options)
 	{
 		console.log("adding no");
 
-		if (!Math.floor(Math.random() * 8))	// Randomly add L/R before adding the pattern, creates non-candle L/R anchors
+		if (!Math.floor(Math.random() * 10))	// Randomly add L/R before adding the pattern, creates non-candle L/R anchors
 		{
 			if (stream.nextArrow == 'L')
 			{
@@ -72,6 +68,28 @@ function addPattern(isNotCandle = true, stream, options)
 		do {
 			pattern = chooseNextPattern((stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
 		} while (lastPatterns.includes(pattern))
+
+		if (pattern.length == 4 && !Math.floor(Math.random() * 12))	// If stair, make big triangle . push stair now into stream, remove last arrow, pattern becomes the other stair
+		{
+			// TODO make function for this, lastPattern, lastPatterns, nextArrow... too many repetitions. processPattern() ? ?
+			convertPatternToList(pattern).forEach(arrow => {
+				stream.arrows.push(arrow);
+			});
+			stream.lastPattern = pattern;
+			stream.arrows.pop(); // Remove stair's last arrow
+			(pattern.slice(-1) == 'R') ? stream.nextArrow = 'L' : stream.nextArrow = 'R';
+			lastPatterns.unshift(pattern);
+			lastPatterns.pop();
+			console.log(pattern);
+
+			var stairDirection = rightFacingPatterns.includes(pattern) ? 'R' : 'L';
+
+			// add stair facing same direction but starting from opposite arrow. Pattern is added at the end of function, very ugly, make sth like pushPattern()
+
+			do {// TODO put this do/while check in chooseNextPattern, pass condition in while?? YES PERFECT
+				pattern = chooseNextPattern((stream.nextArrow == 'R') ? startFromLeftPatterns : startFromRightPatterns)	
+			} while (pattern.length != 4 || stairDirection != (rightFacingPatterns.includes(pattern) ? 'R' : 'L'))
+		}
 	}
 
 	else	// isNotCandle is not zero. TODO(?) balance candles more (aka after x patterns if still no candle add one
