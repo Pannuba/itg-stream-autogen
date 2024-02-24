@@ -1,8 +1,10 @@
 // Patterns that start with left
-const startFromLeftPatterns = {'LDUR' : 25, 'LUDR' : 25, 'LDUDL' : 7, 'LUDUL' : 7, 'LUL' : 18, 'LDL' : 18}
+const startFromLeftPatterns = {'LDUR' : 25, 'LUDR' : 25, 'LDUDL' : 6, 'LUDUL' : 6, 'LUL' : 19, 'LDL' : 19}
 // Yeah
-const startFromRightPatterns = {'RUDL' : 25, 'RDUL' : 25, 'RUDUR' : 7, 'RDUDR' : 7, 'RUR' : 18, 'RDR' : 18}
+const startFromRightPatterns = {'RUDL' : 25, 'RDUL' : 25, 'RUDUR' : 6, 'RDUDR' : 6, 'RUR' : 19, 'RDR' : 19}
+
 const rightFacingPatterns = ['LDUR', 'LDL', 'RUR', 'RUDL', 'LDUDL', 'RUDUR']
+
 const leftFacingPatterns = ['RDUL', 'RDR', 'LUL', 'LUDR', 'RDUDR', 'LUDUL']
 
 /*
@@ -11,7 +13,6 @@ const leftFacingPatterns = ['RDUL', 'RDR', 'LUL', 'LUDR', 'RDUDR', 'LUDUL']
 	* add stair missing first arrow that has opposite nextArrow and belongs to same R/LfacingPatterns list of the dorito
 	When this is done, add anchor density option in form and check when adding random L/R or U/D anchors
 */
-
 
 // Candle down with left or right foot
 const candleDownDict = {'D' : 10, 'DU' : 80, 'DUD' : 10 }
@@ -22,8 +23,6 @@ const candleUpDict = {'U' : 10, 'UD' : 80, 'UDU' : 10 }
 //tot% single candle = (80*3)/4 = 60% (was 40*2/3 = 26.6%)
 
 const arrowsDict = {'L' : '1000', 'D' : '0100', 'U' : '0010', 'R' : '0001'}
-// Last N patterns (3 for now). Only used for non-candles
-var lastPatterns = ['X', 'X']	// Initialize with dummy values. Make part of StreamBlock? Yes
 
 function generateStream(stream, options)
 {
@@ -36,7 +35,7 @@ function generateStream(stream, options)
 	{
 		// TODO: implement random thing like tetris where after every n ALWAYS pick candle
 		stream = addPattern(Math.floor(Math.random() * options["candleDens"]), stream, options);	// if 0 candle, if > 0 no
-		arrowsToGenerate -= stream.lastPattern.length;
+		arrowsToGenerate -= stream.lastPatterns[0].length;
 	}
 
 	return stream;
@@ -67,7 +66,7 @@ function addPattern(isNotCandle = true, stream, options)
 		
 		do {
 			pattern = chooseNextPattern((stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
-		} while (lastPatterns.includes(pattern))
+		} while (stream.lastPatterns.includes(pattern))
 
 		if (pattern.length == 4 && !Math.floor(Math.random() * 12))	// If stair, make big triangle . push stair now into stream, remove last arrow, pattern becomes the other stair
 		{
@@ -75,11 +74,10 @@ function addPattern(isNotCandle = true, stream, options)
 			convertPatternToList(pattern).forEach(arrow => {
 				stream.arrows.push(arrow);
 			});
-			stream.lastPattern = pattern;
 			stream.arrows.pop(); // Remove stair's last arrow
 			(pattern.slice(-1) == 'R') ? stream.nextArrow = 'L' : stream.nextArrow = 'R';
-			lastPatterns.unshift(pattern);
-			lastPatterns.pop();
+			stream.lastPatterns.unshift(pattern);
+			stream.lastPatterns.pop();
 			console.log(pattern);
 
 			var stairDirection = rightFacingPatterns.includes(pattern) ? 'R' : 'L';
@@ -94,7 +92,7 @@ function addPattern(isNotCandle = true, stream, options)
 
 	else	// isNotCandle is not zero. TODO(?) balance candles more (aka after x patterns if still no candle add one
 	{
-		var secondToLastArrow = stream.lastPattern.slice(-2, -1), candlePattern;
+		var secondToLastArrow = stream.lastPatterns[0].slice(-2, -1), candlePattern;
 
 		(secondToLastArrow == 'U') ? candlePattern = chooseNextPattern(candleDownDict) : candlePattern = chooseNextPattern(candleUpDict);
 
@@ -143,10 +141,8 @@ function addPattern(isNotCandle = true, stream, options)
 		}
 	}
 
-	stream.lastPattern = pattern;
-
-	lastPatterns.unshift(pattern);
-	lastPatterns.pop(); // Keep the list with the same amount of elements
+	stream.lastPatterns.unshift(pattern);
+	stream.lastPatterns.pop(); // Keep the list with the same amount of elements
 
 	console.log(pattern);
 

@@ -6,7 +6,7 @@ class StreamBlock {
 		this.quantization = quantization;
 		this.nextArrow = firstArrow;
 		this.arrows = [];
-		this.lastPattern = null;
+		this.lastPatterns = ['X', 'X'];	// Last 2 patterns, initialized with dummy values. [0] is the very last
 		this.firstMeasure = firstMeasure;
 		this.lastMeasure = lastMeasure;
 		console.log("firstMeasure: ", firstMeasure);
