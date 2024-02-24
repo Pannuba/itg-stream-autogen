@@ -63,19 +63,37 @@ class Generator {
 		do {
 			pattern = this.chooseNextPattern((this.stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
 		} while (this.stream.lastPatterns.includes(pattern))
+		/*
+			For algorithmic U/D anchors:
+			* if pattern length is 5 (dorito)
+			* add stair missing first arrow that has opposite nextArrow and belongs to same R/LfacingPatterns list of the dorito
+			When this is done, add anchor density option in form and check when adding random L/R or U/D anchors
+		*/
 
-		if (pattern.length == 4 && !Math.floor(Math.random() * 12))	// If stair, make big triangle . push stair now into stream, remove last arrow, pattern becomes the other stair
+		if (pattern.length == 5 && !Math.floor(Math.random() * 12))
 		{
 			this.processPattern(pattern, stream);
 			
+			this.stream.arrows.pop(); // Remove dorito's last arrow
+			var direction = rightFacingPatterns.includes(pattern) ? 'R' : 'L';
+
+			do {
+				pattern = this.chooseNextPattern((this.stream.nextArrow == 'R') ? startFromLeftPatterns : startFromRightPatterns)	
+			} while (pattern.length != 4 || direction != (rightFacingPatterns.includes(pattern) ? 'R' : 'L'))
+		}
+
+		else if (pattern.length == 4 && !Math.floor(Math.random() * 12))	// Without "else", it can put a triangle right after an U/D anchor, facing the same direction -> bad
+		{																	// If stair, make big triangle . push stair now into stream, remove last arrow, pattern becomes the other stair
+			this.processPattern(pattern, stream);
+			
 			this.stream.arrows.pop(); // Remove stair's last arrow
-			var stairDirection = rightFacingPatterns.includes(pattern) ? 'R' : 'L';
+			var direction = rightFacingPatterns.includes(pattern) ? 'R' : 'L';
 
 			// add stair facing same direction but starting from opposite arrow. Pattern is added at the end of function, very ugly, make sth like pushPattern()
 
 			do {// TODO put this do/while check in chooseNextPattern, pass condition in while?? YES PERFECT
 				pattern = this.chooseNextPattern((this.stream.nextArrow == 'R') ? startFromLeftPatterns : startFromRightPatterns)	
-			} while (pattern.length != 4 || stairDirection != (rightFacingPatterns.includes(pattern) ? 'R' : 'L'))
+			} while (pattern.length != 4 || direction != (rightFacingPatterns.includes(pattern) ? 'R' : 'L'))
 		}
 
 		this.processPattern(pattern, stream);
