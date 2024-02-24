@@ -70,16 +70,9 @@ function addPattern(isNotCandle = true, stream, options)
 
 		if (pattern.length == 4 && !Math.floor(Math.random() * 12))	// If stair, make big triangle . push stair now into stream, remove last arrow, pattern becomes the other stair
 		{
-			// TODO make function for this, lastPattern, lastPatterns, nextArrow... too many repetitions. processPattern() ? ?
-			convertPatternToList(pattern).forEach(arrow => {
-				stream.arrows.push(arrow);
-			});
+			processPattern(pattern, stream);
+			
 			stream.arrows.pop(); // Remove stair's last arrow
-			(pattern.slice(-1) == 'R') ? stream.nextArrow = 'L' : stream.nextArrow = 'R';
-			stream.lastPatterns.unshift(pattern);
-			stream.lastPatterns.pop();
-			console.log(pattern);
-
 			var stairDirection = rightFacingPatterns.includes(pattern) ? 'R' : 'L';
 
 			// add stair facing same direction but starting from opposite arrow. Pattern is added at the end of function, very ugly, make sth like pushPattern()
@@ -96,7 +89,6 @@ function addPattern(isNotCandle = true, stream, options)
 
 		(secondToLastArrow == 'U') ? candlePattern = chooseNextPattern(candleDownDict) : candlePattern = chooseNextPattern(candleUpDict);
 
-		// TODO make function
 		convertPatternToList(candlePattern).forEach(arrow => {
 			stream.arrows.push(arrow);
 		});
@@ -141,6 +133,14 @@ function addPattern(isNotCandle = true, stream, options)
 		}
 	}
 
+	processPattern(pattern, stream);
+	
+	return stream;
+}
+
+// Writes pattern to stream, gets nextArrow, adds to lastPatterns list
+function processPattern(pattern, stream)
+{
 	stream.lastPatterns.unshift(pattern);
 	stream.lastPatterns.pop(); // Keep the list with the same amount of elements
 
@@ -151,8 +151,6 @@ function addPattern(isNotCandle = true, stream, options)
 	convertPatternToList(pattern).forEach(arrow => {
 		stream.arrows.push(arrow);
 	});
-	
-	return stream;
 }
 
 function chooseNextPattern(patternDict)
