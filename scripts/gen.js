@@ -53,20 +53,20 @@ function findFirstArrow(lines, i)
 			
 			for (let k = --j; k > 0; k--)
 			{
-				if (["0100", "0010"].includes(lines[k]))
+				if (["0100", "0010", "0300", "0030"].includes(lines[k]))
 				{
 					patt.unshift(lines[k]);
 				}
 
-				if (["1000", "0001"].includes(lines[k]))
+				if (["1000", "0001", "3000", "0003"].includes(lines[k]))
 				{
 					patt.unshift(lines[k]);
 					// If patt has an even number of arrows, firstArrow is the first one of patt (L/R). If odd, it's the opposite
 					patt = removeJacks(patt);
-					if ( (patt.length % 2) && (patt[0] == "1000")) return 'R';
-					if ( (patt.length % 2) && (patt[0] == "0001")) return 'L';
-					if (!(patt.length % 2) && (patt[0] == "0001")) return 'R';
-					if (!(patt.length % 2) && (patt[0] == "1000")) return 'L';
+					if ( (patt.length % 2) && (patt[0] == "1000" || patt[0] == "3000")) return 'R';
+					if ( (patt.length % 2) && (patt[0] == "0001" || patt[0] == "0003")) return 'L';
+					if (!(patt.length % 2) && (patt[0] == "0001" || patt[0] == "0003")) return 'R';
+					if (!(patt.length % 2) && (patt[0] == "1000" || patt[0] == "3000")) return 'L';
 				}
 			}
 		}
