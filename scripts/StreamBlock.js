@@ -10,8 +10,6 @@ class StreamBlock {
 		this.lastDirections = ['X', 'X', 'X'];
 		this.firstMeasure = firstMeasure;
 		this.lastMeasure = lastMeasure;
-		console.log("lastMeasure: ", lastMeasure)
-				console.log("firstMeasure: ", firstMeasure)
 	}
 	
 	addFirstLastMeasure(measure, finalStream, count, isLastMeasure = false)
@@ -24,13 +22,11 @@ class StreamBlock {
 		
 		for (i = 0; i < converted.length; i++)
 		{
-			console.log("i=",i);
 			if ((converted[i] == "2222" || converted[i] == "4444") && !lock)
 				write = true;
 			
 			if (converted[i] == "3333" && !lock) // adding && write screws up because 
 			{
-				console.log("found 3333");
 				finalStream.push(this.arrows[count++]);
 				i++;
 				// If 2222/4444 is after 3333 but less than "jimmy" spaces?? what do??
@@ -46,7 +42,6 @@ class StreamBlock {
 					
 					else if (i < converted.length)
 					{
-						console.log("pushing 0000");
 						finalStream.push("0000");
 						i++;
 					}
@@ -54,21 +49,16 @@ class StreamBlock {
 
 				write = false;
 				lock = true;	// can no longer write if there's another 2222/4444 after 3333 in the same measure
-				//break;
 			}
 			
 			if (write)
 			{
-				var arr = this.arrows[count++];
-				finalStream.push(arr);
-				console.log("pushed ", arr);
+				finalStream.push(this.arrows[count++]);
 
 				for (let j = 0; j < jimmy - 1; j++)
 				{
 					if (converted[i] == "3333")	// Prevent skipping 3333
 					{
-						//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-						console.log("i=",i,", found ", converted [i]);
 						finalStream.push("0000");
 						i++;
 						write = false;
@@ -78,14 +68,11 @@ class StreamBlock {
 					
 					else
 					{
-						console.log("i=",i,", i'm at ", converted [i]);
-						console.log("pusho 0000");
 						finalStream.push("0000");
 						i++;
+						
 						if (converted[i] == "3333") // Otherwise skipped if at the last position of jimmy
 						{
-							console.log("i=",i,", found ", converted [i]);
-							//finalStream.push("0000");
 							i++;
 							write = false;
 							lock = true;	// can no longer write if there's another 2222/4444 after 3333 in the same measure
@@ -101,13 +88,7 @@ class StreamBlock {
 			}	// No need to use jimmy because old measure is already converted
 
 		}
-		console.log("i: ", i);
-		/*for (let j = i; j < converted.length; j++)
-		{
-			console.log("pushing ", converted[j]);
-			finalStream.push(converted[j]);	// No need to use jimmy because old measure is already converted
-		}
-		*/
+		
 		return [finalStream, count];
 	}
 

@@ -74,7 +74,6 @@ class Generator {
 		if ((rightFacingPatterns.includes(pattern) && this.stream.lastDirections.every(dir => dir == 'R')) || (leftFacingPatterns.includes(pattern) && this.stream.lastDirections.every(dir => dir == 'L')))
 		{
 			pattern = this.mirrorVertically(pattern);
-			console.log('la mirroratura');
 		}
 
 		if (pattern.length == 5 && !Math.floor(Math.random() * this.options["anchorDens"]))
@@ -180,14 +179,7 @@ class Generator {
 	// LDUR becomes LUDR, RDR becomes RUR
 	mirrorVertically(pattern)
 	{
-		console.log("before mirroring pattern is ", pattern);
-		pattern = pattern.replaceAll('U', 'X');
-		console.log("now tis ", pattern);
-		pattern = pattern.replaceAll('D', 'U');
-		console.log("now tis ", pattern);
-		pattern = pattern.replaceAll('X', 'D');
-		console.log("after mirroring pattern is ", pattern);
-		return pattern;
+		return pattern.replaceAll('U', 'X').replaceAll('D', 'U').replaceAll('X', 'D');
 	}
 
 	// Writes pattern to stream, gets nextArrow, adds to lastPatterns list
