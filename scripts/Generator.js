@@ -58,11 +58,20 @@ class Generator {
 				this.stream.arrows.push("0001");
 				this.stream.nextArrow = 'L';
 			}
+			
+			do {
+				pattern = this.chooseNextPattern((this.stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)
+			} while (this.stream.lastPatterns.includes(pattern) || pattern.length == 3)	// Prevent excessively long anchors. Could also check last pattern != 3 in upper if...
+		}
+	
+		else
+		{
+			do {
+				pattern = this.chooseNextPattern((this.stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
+			} while (this.stream.lastPatterns.includes(pattern))
 		}
 		
-		do {
-			pattern = this.chooseNextPattern((this.stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
-		} while (this.stream.lastPatterns.includes(pattern))
+
 
 		if (pattern.length == 5 && !Math.floor(Math.random() * this.options["anchorDens"]))
 		{
