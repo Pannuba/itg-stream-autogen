@@ -71,7 +71,11 @@ class Generator {
 			} while (this.stream.lastPatterns.includes(pattern))
 		}
 		
-
+		if ((rightFacingPatterns.includes(pattern) && this.stream.lastDirections.every(dir => dir == 'R')) || (leftFacingPatterns.includes(pattern) && this.stream.lastDirections.every(dir => dir == 'L')))
+		{
+			pattern = this.mirrorVertically(pattern);
+			console.log('la mirroratura');
+		}
 
 		if (pattern.length == 5 && !Math.floor(Math.random() * this.options["anchorDens"]))
 		{
@@ -172,6 +176,19 @@ class Generator {
 		
 		return stream;
 	}
+	
+	// LDUR becomes LUDR, RDR becomes RUR
+	mirrorVertically(pattern)
+	{
+		console.log("before mirroring pattern is ", pattern);
+		pattern = pattern.replaceAll('U', 'X');
+		console.log("now tis ", pattern);
+		pattern = pattern.replaceAll('D', 'U');
+		console.log("now tis ", pattern);
+		pattern = pattern.replaceAll('X', 'D');
+		console.log("after mirroring pattern is ", pattern);
+		return pattern;
+	}
 
 	// Writes pattern to stream, gets nextArrow, adds to lastPatterns list
 	processPattern(pattern)
@@ -179,6 +196,9 @@ class Generator {
 		this.stream.lastPatterns.unshift(pattern);
 		this.stream.lastPatterns.pop(); // Keep the list with the same amount of elements
 
+		this.stream.lastDirections.unshift(rightFacingPatterns.includes(pattern) ? 'R' : 'L');
+		this.stream.lastDirections.pop();
+		
 		console.log(pattern);
 
 		(pattern.slice(-1) == 'R') ? this.stream.nextArrow = 'L' : this.stream.nextArrow = 'R';
