@@ -88,20 +88,6 @@ class Generator {
 			} while (pattern.length != 4 || direction != this.getDirection(pattern))
 		}
 
-		else if (pattern.length == 4 && !Math.floor(Math.random() * 12))	// Without "else", it can put a triangle right after an U/D anchor, facing the same direction -> bad
-		{																	// If stair, make big triangle . push stair now into stream, remove last arrow, pattern becomes the other stair
-			this.processPattern(pattern, stream);
-			
-			this.stream.arrows.pop(); // Remove stair's last arrow
-			var direction = this.getDirection(pattern);
-
-			// add stair facing same direction but starting from opposite arrow. Pattern is added at the end of function, very ugly, make sth like pushPattern()
-
-			do {// TODO put this do/while check in chooseNextPattern, pass condition in while?? YES PERFECT
-				pattern = this.chooseNextPattern((this.stream.nextArrow == 'R') ? startFromLeftPatterns : startFromRightPatterns)	
-			} while (pattern.length != 4 || direction != this.getDirection(pattern))
-		}
-
 		this.processPattern(pattern, stream);
 		
 		return stream;
@@ -149,8 +135,9 @@ class Generator {
 			this.convertPatternToList(candlePattern).forEach(arrow => {
 				this.stream.arrows.push(arrow);
 			});
-
-			if (Math.floor(Math.random() * this.options["anchorDens"]))	// 1 - 1/anchDens times it's a double candle
+			var joseph = Math.floor(Math.random() * this.options["anchorDens"])
+			console.log("joseph:" + joseph)
+			if (joseph)	// 1 - 1/anchDens times it's a double candle
 			{
 				console.log("adding double candle");
 
@@ -207,14 +194,31 @@ class Generator {
 
 		this.stream.lastDirections.unshift(rightFacingPatterns.includes(pattern) ? 'R' : 'L');
 		this.stream.lastDirections.pop();
-		
-		console.log(pattern);
 
+		console.log(pattern);
 		(pattern.slice(-1) == 'R') ? this.stream.nextArrow = 'L' : this.stream.nextArrow = 'R';
 
 		this.convertPatternToList(pattern).forEach(arrow => {
 			this.stream.arrows.push(arrow);
 		});
+
+		// If pattern is a stair, 1/12 chance to turn it to a big dorito
+		if (pattern.length == 4 && !Math.floor(Math.random() * 12) && ((rightFacingPatterns.includes(pattern) && this.stream.lastDirections[1] == 'L') || (leftFacingPatterns.includes(pattern) && this.stream.lastDirections[1] == 'R')))
+		{
+			console.log("big dorito");
+			var newPattern = this.mirrorBoth(pattern);	// Last "half" of the dorito
+			this.stream.lastPatterns.unshift(newPattern);	// Approximate to an inverted stair to avoid repetition
+			this.stream.lastPatterns.pop();
+
+			this.stream.lastDirections.unshift(rightFacingPatterns.includes(pattern) ? 'R' : 'L');	// Add same direction a second time because it's a big pattern
+			this.stream.lastDirections.pop();
+
+			(newPattern.slice(-1) == 'R') ? this.stream.nextArrow = 'L' : this.stream.nextArrow = 'R';
+
+			this.convertPatternToList(newPattern.substring(1)).forEach(arrow => {		// substring removes first arrow of stair
+				this.stream.arrows.push(arrow);
+			});
+		}
 	}
 
 	chooseNextPattern(patternDict)
