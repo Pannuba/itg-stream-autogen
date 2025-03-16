@@ -110,45 +110,45 @@ class Generator {
 	addCandle()
 	{
 		var pattern = "";
-		
+
+		var lastArrow = (this.stream.nextArrow == 'R' ? 'L' : 'R');
 		var secondToLastArrow = this.stream.lastPatterns[0].slice(-2, -1), candlePattern;
 
 		(secondToLastArrow == 'U') ? candlePattern = this.chooseNextPattern(candleDownDict) : candlePattern = this.chooseNextPattern(candleUpDict);
 
-		this.convertPatternToList(candlePattern).forEach(arrow => {
-			this.stream.arrows.push(arrow);
-		});
 
-		// Gets stuck if I put the lastPatterns check. Fixed by reducing lastPatterns to 2 from 3.
-
+		// call process pattern with ludr, build pattern using last arrow+candlepattern+nextarrow
 		if (candlePattern.length == 2)	// 80% of the time
 		{
+
 			if (Math.floor(Math.random() * 4) && !this.options['wtfMode'])	// 3/4ths of the time single candle. Skips for wtf mode
 			{
 				console.log("adding single candle");
 
-				do {
-						pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
-				} while ((pattern[1] + pattern[2] == candlePattern) && pattern.length == 4) // Prevents double stairs. Add option to allow them?
-
-				this.stream.arrows.push(this.stream.nextArrow == 'L' ? "1000" : "0001");	// Ok because pattern is added later anyway
+				this.stream.arrows.pop(); // remove last arrow because it's going to be repeated (full pattern will be added e.g LUDR instead of UDR)
+				pattern = lastArrow + candlePattern + this.stream.nextArrow;	// Basically a stair
 			}
 			
 			else	// 1/4th of DU/UD candles are double
 			{
 				console.log("adding double candle");
-				
+				// For double candles I push in the stream without calling processPattern so "pattern" is a basic one
+				this.convertPatternToList(candlePattern).forEach(arrow => {
+					this.stream.arrows.push(arrow);
+				});
+
 				do {
 					pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromLeftPatterns : startFromRightPatterns);
-				} while (pattern[1] == candlePattern[1]);	// TODO(?) remove this condition? makes some boxes show up. Maybe add option
+				} while (pattern[1] == candlePattern[1]);
+
 			}
 		}
 		
 		else	// 20% of the time (10% U/D, 10% UDU/DUD)
 		{
-			/*
-			TODO MERGE ANCHOR IF LENGTH IS 1 OR 3, ADD ANOTHER CHECK IN THE FIRST IF (WHEN I WANT ANCHROS)
-			*/
+			this.convertPatternToList(candlePattern).forEach(arrow => {
+				this.stream.arrows.push(arrow);
+			});
 
 			if (Math.floor(Math.random() * this.options["anchorDens"]))	// 1 - 1/anchDens times it's a double candle
 			{
@@ -159,11 +159,11 @@ class Generator {
 				} while ((candlePattern.length == 3 && pattern[1] == candlePattern[2]) ||	// pattern[1] check prevents ugly ass patterns which may actually be ok for O.A.S. add option?
 				         (candlePattern.length == 1 && (pattern.length == 3 || pattern[1] == candlePattern)));
 			}
-			
+
 			else	// 1/anchDens times, U/D anchor. Does NOT skip for wtf mode because anchors funni
 			{
 				console.log("adding candle anchor (double or single)");
-				
+
 				do {
 					pattern = this.chooseNextPattern(this.stream.nextArrow == 'L' ? startFromRightPatterns : startFromLeftPatterns);
 				} while ((candlePattern.length == 3 && (pattern[1] != candlePattern[2] || pattern.length != 4)) ||	// If UDU/DUD candle, I want a stair that makes an U/D anchor
