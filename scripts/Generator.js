@@ -81,11 +81,11 @@ class Generator {
 			this.processPattern(pattern, stream);
 			
 			this.stream.arrows.pop(); // Remove dorito's last arrow
-			var direction = rightFacingPatterns.includes(pattern) ? 'R' : 'L';
+			var direction = this.getDirection(pattern);
 
 			do {
 				pattern = this.chooseNextPattern((this.stream.nextArrow == 'R') ? startFromLeftPatterns : startFromRightPatterns)	
-			} while (pattern.length != 4 || direction != (rightFacingPatterns.includes(pattern) ? 'R' : 'L'))
+			} while (pattern.length != 4 || direction != this.getDirection(pattern))
 		}
 
 		else if (pattern.length == 4 && !Math.floor(Math.random() * 12))	// Without "else", it can put a triangle right after an U/D anchor, facing the same direction -> bad
@@ -93,13 +93,13 @@ class Generator {
 			this.processPattern(pattern, stream);
 			
 			this.stream.arrows.pop(); // Remove stair's last arrow
-			var direction = rightFacingPatterns.includes(pattern) ? 'R' : 'L';
+			var direction = this.getDirection(pattern);
 
 			// add stair facing same direction but starting from opposite arrow. Pattern is added at the end of function, very ugly, make sth like pushPattern()
 
 			do {// TODO put this do/while check in chooseNextPattern, pass condition in while?? YES PERFECT
 				pattern = this.chooseNextPattern((this.stream.nextArrow == 'R') ? startFromLeftPatterns : startFromRightPatterns)	
-			} while (pattern.length != 4 || direction != (rightFacingPatterns.includes(pattern) ? 'R' : 'L'))
+			} while (pattern.length != 4 || direction != this.getDirection(pattern))
 		}
 
 		this.processPattern(pattern, stream);
@@ -192,6 +192,11 @@ class Generator {
 	mirrorBoth(pattern)
 	{
 		return this.mirrorVertically(this.mirrorHorizontally(pattern));
+	}
+
+	getDirection(pattern)
+	{
+		return (rightFacingPatterns.includes(pattern) ? 'R' : 'L');
 	}
 
 	// Writes pattern to stream, gets nextArrow, adds to lastPatterns list
