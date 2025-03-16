@@ -68,7 +68,7 @@ class Generator {
 		{
 			do {
 				pattern = this.chooseNextPattern((this.stream.nextArrow == 'L') ? startFromLeftPatterns : startFromRightPatterns)	
-			} while (this.stream.lastPatterns.includes(pattern))
+			} while (this.stream.lastPatterns.includes(pattern) || pattern == this.mirrorBoth(this.stream.lastPatterns[0])) // Second condition prevents for example double right facing dorito)
 		}
 		
 		if ((rightFacingPatterns.includes(pattern) && this.stream.lastDirections.every(dir => dir == 'R')) || (leftFacingPatterns.includes(pattern) && this.stream.lastDirections.every(dir => dir == 'L')))
@@ -180,6 +180,18 @@ class Generator {
 	mirrorVertically(pattern)
 	{
 		return pattern.replaceAll('U', 'X').replaceAll('D', 'U').replaceAll('X', 'D');
+	}
+
+	// LDUR becomes RDUL, RDR becomes LDL
+	mirrorHorizontally(pattern)
+	{
+		return pattern.replaceAll('R', 'X').replaceAll('L', 'R').replaceAll('X', 'L');
+	}
+
+	// LDUR becomes RUDL, RDR becomes LUL
+	mirrorBoth(pattern)
+	{
+		return this.mirrorVertically(this.mirrorHorizontally(pattern));
 	}
 
 	// Writes pattern to stream, gets nextArrow, adds to lastPatterns list

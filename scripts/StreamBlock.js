@@ -7,7 +7,7 @@ class StreamBlock {
 		this.nextArrow = firstArrow;
 		this.arrows = [];
 		this.lastPatterns = ['X', 'X'];	// Last 2 patterns, initialized with dummy values. [0] is the very last
-		this.lastDirections = ['X', 'X', 'X'];
+		this.lastDirections = ['X', 'X'];
 		this.firstMeasure = firstMeasure;
 		this.lastMeasure = lastMeasure;
 	}
