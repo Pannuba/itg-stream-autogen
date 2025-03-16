@@ -135,7 +135,7 @@ function noPlagiarism(chart)	// TODO: calculate breakdown???????
 		if (lines[i] == "#NOTES:")	// Step artist field is the second line after #NOTES:
 		{
 			stepArtist = lines[i+2].match(/[ a-z]*/i);	// Includes spaces before name
-			lines[i+2] = stepArtist + ", itg-stream-autogen:"
+			//lines[i+2] = stepArtist + ", itg-stream-autogen:"; // disabled because annoying, might reenable when I find a way to calculate the breakdown
 		}
 	}
 	
